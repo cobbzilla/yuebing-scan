@@ -1,0 +1,67 @@
+{
+  "name": "yuebing-scan",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A scanning/processing framework for yuebing",
+  "keywords": [
+    "storage",
+    "s3",
+    "b2",
+    "simple",
+    "filesystem",
+    "orm",
+    "tool",
+    "mobiletto",
+    "mobiletto-orm"
+  ],
+  "homepage": "https://github.com/cobbzilla/yuebing-scan",
+  "author": "Jonathan Cobb <udo9jqld@duck.com> (https://github.com/cobbzilla)",
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/cobbzilla"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cobbzilla/yuebing-scan.git"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "mocha --timeout 60000 ./test/*.spec.js",
+    "tsc": "tsc --module es2020 -p tsconfig.json",
+    "lint": "npx eslint src test",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "npx prettier src test --check",
+    "prettier:fix": "npm run prettier -- --write"
+  },
+  "main": "./lib/esm/index.js",
+  "module": "./lib/esm/index.js",
+  "exports": {
+    ".": "./lib/esm/index.js"
+  },
+  "files": [
+    "lib/"
+  ],
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.4.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "chai": "^4.3.6",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "mobiletto-base": "^2.1.1",
+    "mobiletto-common": "^2.1.2",
+    "mobiletto-driver-local": "^2.0.13",
+    "mobiletto-orm": "^2.2.36",
+    "mobiletto-orm-scan": "^1.0.13",
+    "mobiletto-orm-scan-typedef": "^1.0.12",
+    "mobiletto-orm-typedef": "^2.4.5",
+    "mocha": "^10.2.0",
+    "prettier": "^3.0.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^5.1.6",
+    "yuebing-messages": "^2.1.7",
+    "yuebing-model": "^2.6.16"
+  }
+}
