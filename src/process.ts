@@ -22,8 +22,8 @@ const assetPath = (path: string) => path.substring(path.indexOf(ASSET_SEP));
 
 const DOWNLOAD_TIMEOUT = 1000 * 60;
 
-const downloadAsset = async (processor: YbProcessor, discoveredAsset: SourceAssetType) => {
-    const assetName = discoveredAsset.name;
+const downloadSourceAsset = async (processor: YbProcessor, sourceAsset: SourceAssetType) => {
+    const assetName = sourceAsset.name;
     if (!assetName) return;
 
     const ext = fileExtWithDot(assetName);
@@ -31,7 +31,7 @@ const downloadAsset = async (processor: YbProcessor, discoveredAsset: SourceAsse
     const outfile = processor.config.downloadDir + "/downloaded_" + sha(assetName) + ext;
     let outfileStat = fs.statSync(outfile, { throwIfNoEntry: false });
     const sourceRepo = processor.config.sourceRepo();
-    const source = await sourceRepo.findById(discoveredAsset.source);
+    const source = await sourceRepo.findById(sourceAsset.source);
     const conn = await connectVolume(source);
     const meta = await conn.metadata(srcPath);
     if (outfileStat) {
@@ -88,7 +88,7 @@ const parseProfile = async (processor: YbProcessor, profile: MediaProfileType): 
 
 export const processSourceAsset = async (processor: YbProcessor, sourceAsset: SourceAssetType) => {
     const destAssetRepo = processor.config.destinationAssetRepo();
-    const downloaded = await downloadAsset(processor, sourceAsset);
+    const downloaded = await downloadSourceAsset(processor, sourceAsset);
 
     // which media types are interested in this file?
     const mediaRepo = processor.config.mediaRepo();
@@ -111,7 +111,7 @@ export const processSourceAsset = async (processor: YbProcessor, sourceAsset: So
             if (outputAssets && outputAssets.length > 0) {
                 for (const outputAsset of outputAssets) {
                     const newDestAsset: DestinationAssetType = {
-                        name: outputAsset, // todo: fixme
+                        name: outputAsset,
                         profile: profile.name,
                         source: sourceAsset.source,
                         sourceAsset: sourceAsset.name,
