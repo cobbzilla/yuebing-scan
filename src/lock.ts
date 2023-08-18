@@ -18,14 +18,15 @@ const claimLock = async <LOCK extends MobilettoLockType>(
     targetId: string,
     logger: MobilettoLogger,
 ): Promise<LOCK | null> => {
+    const startedAt = clock.now();
     const update = Object.assign({}, lock, {
         owner: systemName,
         status: "started",
-        started: clock.now(),
+        started: startedAt,
     });
     const updated = await lockRepo.update(update);
     const verified = await lockRepo.safeFindFirstBy(targetType.typeName, targetId);
-    if (verified?.owner === systemName) {
+    if (verified?.owner === systemName && verified?.status === "started" && verified?.started === startedAt) {
         return verified;
     } else {
         logger.error(
@@ -42,7 +43,7 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
     lockRepo: MobilettoOrmRepository<LOCK>,
     target: T,
     targetType: MobilettoOrmTypeDef,
-    interval: number,
+    lockTimeout: number,
 ): Promise<LOCK | null> => {
     const targetId = targetType.id(target);
     const lock: LOCK | null = await lockRepo.safeFindFirstBy(targetType.typeName, targetId);
@@ -64,14 +65,10 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
             return null;
         }
     } else if (lock.finished) {
-        if (clock.now() - lock.finished > interval) {
-            return await claimLock(lock, systemName, clock, lockRepo, targetType, targetId, logger);
-        } else {
-            logger.warn(`acquireLock warn=recently_scanned finished=${lock.finished}`);
-            return null;
-        }
+        logger.warn(`acquireLock warn=recently_scanned finished=${lock.finished}`);
+        return null;
     } else if (lock.started) {
-        if (clock.now() - lock.started > 4 * interval) {
+        if (clock.now() - lock.started > lockTimeout) {
             return await claimLock(lock, systemName, clock, lockRepo, targetType, targetId, logger);
         } else {
             logger.warn(`acquireLock warn=recently_scanning started=${lock.started}`);

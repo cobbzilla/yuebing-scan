@@ -66,8 +66,8 @@ devDependencies:
     specifier: ^2.1.7
     version: 2.1.7
   yuebing-model:
-    specifier: ^2.6.16
-    version: 2.6.16
+    specifier: ^2.6.24
+    version: 2.6.24
 
 packages:
 
@@ -454,14 +454,15 @@ packages:
     resolution: {integrity: sha512-qhAVI1+Av2X7qelOfAIYwXONood6XlZE/fXaBSmW/T5SzLAmCgzi+eiWE7fUvbHaeNBQH13UftjpXxsfLkMpgw==}
     dev: true
 
-  /bullmq@4.7.2:
-    resolution: {integrity: sha512-cAK1Xlj8HkD18zTPHKlALrQj6JwnUqxXRW94uXr4YjYBdooYMaB31aGcnEq7h4nLq50si1eW0YRcgswYlK7vaw==}
+  /bullmq@4.7.3:
+    resolution: {integrity: sha512-5xh6qwmX/BMG3MNlLI3HP9FPKtTNfAogbfN08ugdr9wA3HVMqgvIkGR7i9OSvp6CNwvIjuq4t9lk0AaLEdFc5A==}
     dependencies:
       cron-parser: 4.9.0
       glob: 8.1.0
       ioredis: 5.3.2
       lodash: 4.17.21
       msgpackr: 1.9.7
+      node-abort-controller: 3.1.1
       semver: 7.5.4
       tslib: 2.6.1
       uuid: 9.0.0
@@ -1160,7 +1161,7 @@ packages:
   /mobiletto-base@2.1.1:
     resolution: {integrity: sha512-Q0mjSRfULuP1edMAJD/BWXQEj4LcIouXhA6cbASaHAxYS87M8VluJM/7peTnz+4cSxELXApRnR7oM8J+eT8voA==}
     dependencies:
-      bullmq: 4.7.2
+      bullmq: 4.7.3
       ioredis: 5.3.2
       lru-cache: 10.0.1
       mobiletto-common: 2.1.2
@@ -1270,6 +1271,10 @@ packages:
 
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+    dev: true
+
+  /node-abort-controller@3.1.1:
+    resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
     dev: true
 
   /node-domexception@1.0.0:
@@ -1673,6 +1678,6 @@ packages:
       hokey-runtime: 1.0.4
     dev: true
 
-  /yuebing-model@2.6.16:
-    resolution: {integrity: sha512-+1gHU/8aV7+G3Mu/36ZPDps5WlQgMFoougsrt0dPWhnx1HcFt3sPudP/ZWgbhkRsNhDL/xoGLGEfyHGZrtu+nA==}
+  /yuebing-model@2.6.24:
+    resolution: {integrity: sha512-ZXnq0fAHCTaGcMWU6jq2psT5o3rSv6EWKIQgfNLMc1RqtVkLt5qnLlJY5JaGatozEQn/tdkTkFXqpySdG2K0CA==}
     dev: true

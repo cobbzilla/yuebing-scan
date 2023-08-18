@@ -113,8 +113,8 @@ before(async () => {
     }
 });
 
-describe("discovery scan test", async () => {
-    it("should scan a directory and discover assets", async () => {
+describe("scan test", async () => {
+    it("should scan a directory and discover and download and analyze an asset", async () => {
         const scanConfig = {
             systemName: test.localConfig.systemName,
             localConfigRepo: () => test.localConfigRepo,
@@ -140,6 +140,8 @@ describe("discovery scan test", async () => {
         }
         expect(all.length).eq(1);
         expect(all[0].name).eq(test.source.name + ASSET_SEP + "sample.txt");
+
+        // wait for downloader to download asset
     });
 });
 

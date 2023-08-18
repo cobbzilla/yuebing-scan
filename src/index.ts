@@ -1,1 +1,1 @@
-export * from "./ybScan.js";
+export * from "./ybScanner.js";

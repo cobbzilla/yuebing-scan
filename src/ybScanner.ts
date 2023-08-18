@@ -1,48 +1,21 @@
-import { MobilettoLogger, MobilettoMetadata } from "mobiletto-common";
-import {
-    AnalyzedAssetType,
-    DiscoveredAssetType,
-    DownloadedAssetType,
-    LibraryScanType,
-    LibraryType,
-    LibraryTypeDef,
-    LocalConfigType,
-    MediaType,
-    SourceScanType,
-    SourceType,
-} from "yuebing-model";
-import { MobilettoOrmObject, MobilettoOrmRepository } from "mobiletto-orm";
+import { MobilettoMetadata } from "mobiletto-common";
+import { SourceAssetType, LibraryScanType, LibraryType, LibraryTypeDef, MediaType } from "yuebing-model";
+import { MobilettoOrmObject } from "mobiletto-orm";
 import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
-import { MobilettoConnection } from "mobiletto-base";
+import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
-import { ybScanLoop } from "./loop.js";
-
-export type YbScanConfig = {
-    systemName: string;
-    scanCheckInterval?: number;
-    logger: MobilettoLogger;
-    localConfigRepo: () => MobilettoOrmRepository<LocalConfigType>;
-    mediaRepo: () => MobilettoOrmRepository<MediaType>;
-    libraryRepo: () => MobilettoOrmRepository<LibraryType>;
-    libraryScanRepo: () => MobilettoOrmRepository<LibraryScanType>;
-    sourceScanRepo: () => MobilettoOrmRepository<SourceScanType>;
-    sourceRepo: () => MobilettoOrmRepository<SourceType>;
-    discoveredAssetRepo: () => MobilettoOrmRepository<DiscoveredAssetType>;
-    downloadedAssetRepo?: () => MobilettoOrmRepository<DownloadedAssetType>;
-    analyzedAssetRepo?: () => MobilettoOrmRepository<AnalyzedAssetType>;
-    sourceConnections: Record<string, MobilettoConnection>;
-    clock?: MobilettoClock;
-};
+import { ybScanLoop } from "./scanLoop.js";
+import { YbProcessor } from "./ybProcessor.js";
 
 export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 
-export const LIBRARY_SCAN_TIMEOUT = 1000 * 60 * 60 * 24;
-export const LIBRARY_SCAN_CHECK_INTERVAL = 1000 * 60;
+// export const LIBRARY_SCAN_TIMEOUT = 1000 * 60 * 60 * 24;
+// export const LIBRARY_SCAN_CHECK_INTERVAL = 1000 * 60;
 
 export const ASSET_SEP = ">";
 
-export class YbScan {
+export class YbScanner {
     readonly config: YbScanConfig;
     readonly scanCheckInterval: number;
     readonly clock: MobilettoClock;
@@ -52,6 +25,7 @@ export class YbScan {
     running: boolean = false;
     stopping: boolean = false;
     readonly scanner: MobilettoScanner;
+    readonly processor: YbProcessor;
 
     constructor(config: YbScanConfig) {
         this.config = config;
@@ -59,6 +33,8 @@ export class YbScan {
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
         this.initTime = this.clock.now();
         this.scanner = new MobilettoScanner(this.config.systemName, this.scanCheckInterval, this.clock);
+        this.processor = new YbProcessor(this.config);
+        if (!this.config.downloadDir) this.config.downloadDir = "/tmp/ybDownload";
         this.start();
     }
 
@@ -72,6 +48,7 @@ export class YbScan {
                 this.scanner.start();
             }
         }
+        this.processor.start();
     }
 
     stop() {
@@ -164,9 +141,9 @@ export class YbScan {
             visit: async (meta: MobilettoMetadata): Promise<unknown> => {
                 const fullName = sourceName + ASSET_SEP + meta.name;
                 try {
-                    const discoveredAssetRepo = this.config.discoveredAssetRepo();
+                    const discoveredAssetRepo = this.config.sourceAssetRepo();
                     if (!(await discoveredAssetRepo.safeFindById(fullName))) {
-                        const asset: DiscoveredAssetType = {
+                        const asset: SourceAssetType = {
                             name: fullName,
                             source: sourceName,
                             owner: this.config.systemName,
@@ -198,24 +175,4 @@ export class YbScan {
         }
         return scan;
     }
-
-    // discovery loop:
-    //  does localConfig allow scanning? if not, go back to sleep until next loop
-    //  if enabled, sleep for initialDelay (if set)
-    //  poll for libraries
-    //  for each library: LibraryScan repo, findBy library - when was the most recent started run?
-    //    - if not exist? create one, ensure we are owners of the scan, and run it
-    //    - if exist but start time is TOO OLD (tbd), update ourselves to be the owners, and run it
-    //    - if exist but the start/finish time is recent ENOUGH, skip it, we do not need to scan
-
-    // LibraryDiscovery:
-    //  create a SourceDiscovery scan for each source
-    //    -- check ALL other libraries that include this source, and merge ALL file extensions for
-    //        ALL media types included
-
-    // SourceDiscovery:
-    //  does a scanner exist? if not, create one and start it
-
-    // download loop:
-    //   claim DiscoveredAsset
 }

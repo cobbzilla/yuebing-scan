@@ -1,8 +1,8 @@
 import { sleep } from "mobiletto-orm-scan-typedef";
 import { LibraryType } from "yuebing-model";
-import { YbScan } from "./ybScan";
+import { YbScanner } from "./ybScanner";
 
-export const ybScanLoop = async (ybScan: YbScan) => {
+export const ybScanLoop = async (ybScan: YbScanner) => {
     let first = true;
     try {
         while (!ybScan.stopping) {
@@ -18,7 +18,7 @@ export const ybScanLoop = async (ybScan: YbScan) => {
                     continue;
                 }
             } catch (e) {
-                ybScan.config.logger.error(`scanLibrary autoscanEnabled_check error=${e}`);
+                ybScan.config.logger.error(`scanLoop: scanLibrary autoscanEnabled_check error=${e}`);
                 continue;
             }
 
@@ -28,20 +28,20 @@ export const ybScanLoop = async (ybScan: YbScan) => {
             for (const lib of libraries) {
                 if (ybScan.stopping) break;
                 if (!lib.autoscan || !lib.autoscan.interval) {
-                    ybScan.config.logger.error(`scanLibrary lib=${lib.name} error=no_interval`);
+                    ybScan.config.logger.error(`scanLoop: scanLibrary lib=${lib.name} error=no_interval`);
                     continue;
                 }
                 const interval = lib.autoscan.interval;
                 try {
                     await ybScan.scanLibrary(lib, interval);
                 } catch (e) {
-                    ybScan.config.logger.error(`scanLibrary lib=${lib.name} error=${e}`);
+                    ybScan.config.logger.error(`scanLoop: scanLibrary lib=${lib.name} error=${e}`);
                 }
             }
         }
     } finally {
         if (!ybScan.stopping) {
-            ybScan.config.logger.warn("loop ending without stopping === true");
+            ybScan.config.logger.warn("scanLoop: loop ending without stopping === true");
             ybScan.stopping = true;
         }
         ybScan.timeout = null;
