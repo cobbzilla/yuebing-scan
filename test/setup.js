@@ -3,7 +3,7 @@ import * as os from "os";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { rand, repositoryFactory } from "mobiletto-orm";
-import { mobiletto } from "mobiletto-base";
+import { logger, mobiletto } from "mobiletto-base";
 import {
     resolveConnectionConfig,
     DestinationTypeDef,
@@ -30,6 +30,8 @@ const ensureDir = (dir) => {
 };
 
 export const newTest = async () => {
+    logger.setLogLevel("info");
+
     const test = {
         factory: null,
         tempDir: null,
@@ -124,5 +126,27 @@ export const newTest = async () => {
         autoscan: { initialDelay: 10000 },
     };
     await test.localConfigRepo.create(test.localConfig);
+
+    test.scanConfig = () => ({
+        systemName: test.localConfig.systemName,
+        localConfigRepo: () => test.localConfigRepo,
+        scanCheckInterval: 1000,
+        logger,
+        mediaRepo: () => test.mediaRepo,
+        mediaProfileRepo: () => test.mediaProfileRepo,
+        sourceRepo: () => test.sourceRepo,
+        libraryRepo: () => test.libraryRepo,
+        libraryScanRepo: () => test.libraryScanRepo,
+        sourceScanRepo: () => test.sourceScanRepo,
+        sourceAssetRepo: () => test.sourceAssetRepo,
+        profileJobRepo: () => test.profileJobRepo,
+        uploadJobRepo: () => test.uploadJobRepo,
+        sourceConnections: test.sourceConnections,
+        downloadDir: test.downloadDir,
+        assetDir: test.assetDir,
+        runAnalyzer: false,
+        runTransformer: false,
+        runUploader: false,
+    });
     return test;
 };

@@ -19,29 +19,8 @@ before(async () => {
 
 describe("scan test", async () => {
     it("should scan a directory and discover and download and analyze an asset", async () => {
-        const scanConfig = {
-            systemName: test.localConfig.systemName,
-            localConfigRepo: () => test.localConfigRepo,
-            scanCheckInterval: 1000,
-            logger,
-            mediaRepo: () => test.mediaRepo,
-            mediaProfileRepo: () => test.mediaProfileRepo,
-            sourceRepo: () => test.sourceRepo,
-            libraryRepo: () => test.libraryRepo,
-            libraryScanRepo: () => test.libraryScanRepo,
-            sourceScanRepo: () => test.sourceScanRepo,
-            sourceAssetRepo: () => test.sourceAssetRepo,
-            profileJobRepo: () => test.profileJobRepo,
-            uploadJobRepo: () => test.uploadJobRepo,
-            sourceConnections: test.sourceConnections,
-            downloadDir: test.downloadDir,
-            assetDir: test.assetDir,
-            runAnalyzer: false,
-            runTransformer: false,
-            runUploader: false,
-        };
+        const scanConfig = test.scanConfig();
         test.scanner = new YbScanner(scanConfig);
-        logger.setLogLevel("info");
 
         // wait for scanner to discover asset
         let all = await test.sourceAssetRepo.findAll();
