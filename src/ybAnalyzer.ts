@@ -2,15 +2,15 @@ import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef
 import { SourceAssetType, SourceAssetTypeDef } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
-import { processSourceAsset } from "./process.js";
+import { analyzeSourceAsset } from "./analyze.js";
 
-const DOWNLOAD_LOCK_TIMEOUT = 1000 * 60 * 60;
-const DEFAULT_DOWNLOAD_POLL_INTERVAL = 1000 * 60;
+const DOWNLOAD_LOCK_TIMEOUT = 1000 * 60 * 60; // 1 hour
+const DEFAULT_ANALYZER_POLL_INTERVAL = 1000 * 60;
 
-export class YbProcessor {
+export class YbAnalyzer {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
-    readonly downloadPollInterval: number;
+    readonly analyzerPollInterval: number;
 
     timeout: number | object | null = null;
     running: boolean = false;
@@ -20,14 +20,14 @@ export class YbProcessor {
     constructor(config: YbScanConfig) {
         this.config = config;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
-        this.downloadPollInterval = config.downloadPollInterval
-            ? config.downloadPollInterval
-            : DEFAULT_DOWNLOAD_POLL_INTERVAL;
+        this.analyzerPollInterval = config.analyzerPollInterval
+            ? config.analyzerPollInterval
+            : DEFAULT_ANALYZER_POLL_INTERVAL;
     }
     start() {
         if (!this.timeout) {
             if (this.running) {
-                this.config.logger.info(`start: already running (but timeout was null?)`);
+                this.config.logger.info(`YbAnalyzer.start: already running (but timeout was null?)`);
             } else {
                 this.running = true;
                 this.timeout = setTimeout(() => ybProcessLoop(this), 1);
@@ -50,7 +50,7 @@ export class YbProcessor {
         );
         if (!lock) return false;
 
-        await processSourceAsset(this, lock);
+        await analyzeSourceAsset(this, lock);
 
         // update lock, mark finished
         lock.owner = this.config.systemName; // should be the same, but whatever
@@ -63,31 +63,31 @@ export class YbProcessor {
     }
 }
 
-const ybProcessLoop = async (processor: YbProcessor) => {
+const ybProcessLoop = async (analyzer: YbAnalyzer) => {
     try {
-        while (!processor.stopping) {
+        while (!analyzer.stopping) {
             try {
-                const assetRepo = processor.config.sourceAssetRepo();
-                const discovered = await assetRepo.safeFindFirstBy("status", "pending");
-                if (processor.stopping) break;
+                const srcAssetRepo = analyzer.config.sourceAssetRepo();
+                const discovered = await srcAssetRepo.safeFindFirstBy("status", "pending");
+                if (analyzer.stopping) break;
                 let processed = false;
                 if (discovered) {
-                    processed = await processor.downloadAndProcess(discovered);
+                    processed = await analyzer.downloadAndProcess(discovered);
                 }
                 if (!discovered || !processed) {
-                    const jitter = Math.floor(processor.downloadPollInterval * (Math.random() * 0.5 + 0.1));
-                    await sleep(processor.downloadPollInterval + jitter);
+                    const jitter = Math.floor(analyzer.analyzerPollInterval * (Math.random() * 0.5 + 0.1));
+                    await sleep(analyzer.analyzerPollInterval + jitter);
                 }
             } catch (e) {
-                processor.config.logger.error(`ybProcessLoop: error=${e}`);
+                analyzer.config.logger.error(`ybProcessLoop: error=${e}`);
             }
         }
     } finally {
-        if (!processor.stopping) {
-            processor.config.logger.warn("ybProcessLoop: loop ending without stopping === true");
-            processor.stopping = true;
+        if (!analyzer.stopping) {
+            analyzer.config.logger.warn("ybProcessLoop: loop ending without stopping === true");
+            analyzer.stopping = true;
         }
-        processor.timeout = null;
-        processor.running = false;
+        analyzer.timeout = null;
+        analyzer.running = false;
     }
 };

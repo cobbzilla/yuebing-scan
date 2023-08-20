@@ -14,7 +14,6 @@ const claimLock = async <LOCK extends MobilettoLockType>(
     systemName: string,
     clock: MobilettoClock,
     lockRepo: MobilettoOrmRepository<LOCK>,
-    targetType: MobilettoOrmTypeDef,
     targetId: string,
     logger: MobilettoLogger,
 ): Promise<LOCK | null> => {
@@ -25,7 +24,7 @@ const claimLock = async <LOCK extends MobilettoLockType>(
         started: startedAt,
     });
     const updated = await lockRepo.update(update);
-    const verified = await lockRepo.safeFindFirstBy(targetType.typeName, targetId);
+    const verified = await lockRepo.safeFindById(targetId);
     if (verified?.owner === systemName && verified?.status === "started" && verified?.started === startedAt) {
         return verified;
     } else {
@@ -46,7 +45,7 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
     lockTimeout: number,
 ): Promise<LOCK | null> => {
     const targetId = targetType.id(target);
-    const lock: LOCK | null = await lockRepo.safeFindFirstBy(targetType.typeName, targetId);
+    const lock: LOCK | null = await lockRepo.safeFindById(targetId);
     if (!lock) {
         const toCreate: MobilettoLockType = {
             owner: systemName,
@@ -55,7 +54,7 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
         };
         toCreate[targetType.typeName] = targetId;
         const created = await lockRepo.create(toCreate as LOCK);
-        const found = await lockRepo.safeFindFirstBy(targetType.typeName, targetId);
+        const found = await lockRepo.safeFindById(targetId);
         if (found?.owner === systemName) {
             return found;
         } else {
@@ -69,12 +68,12 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
         return null;
     } else if (lock.started) {
         if (clock.now() - lock.started > lockTimeout) {
-            return await claimLock(lock, systemName, clock, lockRepo, targetType, targetId, logger);
+            return await claimLock(lock, systemName, clock, lockRepo, targetId, logger);
         } else {
             logger.warn(`acquireLock warn=recently_scanning started=${lock.started}`);
             return null;
         }
     } else {
-        return await claimLock(lock, systemName, clock, lockRepo, targetType, targetId, logger);
+        return await claimLock(lock, systemName, clock, lockRepo, targetId, logger);
     }
 };

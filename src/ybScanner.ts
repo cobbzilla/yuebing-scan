@@ -3,17 +3,17 @@ import { SourceAssetType, LibraryScanType, LibraryType, LibraryTypeDef, MediaTyp
 import { MobilettoOrmObject } from "mobiletto-orm";
 import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
+import { ASSET_SEP } from "yuebing-media";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
-import { ybScanLoop } from "./scanLoop.js";
-import { YbProcessor } from "./ybProcessor.js";
+import { ybScanLoop } from "./scan.js";
+import { YbAnalyzer } from "./ybAnalyzer.js";
+import { YbTransformer } from "./ybTransformer.js";
 
 export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 
 // export const LIBRARY_SCAN_TIMEOUT = 1000 * 60 * 60 * 24;
 // export const LIBRARY_SCAN_CHECK_INTERVAL = 1000 * 60;
-
-export const ASSET_SEP = ">";
 
 export class YbScanner {
     readonly config: YbScanConfig;
@@ -25,7 +25,8 @@ export class YbScanner {
     running: boolean = false;
     stopping: boolean = false;
     readonly scanner: MobilettoScanner;
-    readonly processor: YbProcessor;
+    readonly processor: YbAnalyzer;
+    readonly transformer: YbTransformer;
 
     constructor(config: YbScanConfig) {
         this.config = config;
@@ -33,8 +34,8 @@ export class YbScanner {
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
         this.initTime = this.clock.now();
         this.scanner = new MobilettoScanner(this.config.systemName, this.scanCheckInterval, this.clock);
-        this.processor = new YbProcessor(this.config);
-        if (!this.config.downloadDir) this.config.downloadDir = "/tmp/ybDownload";
+        this.processor = new YbAnalyzer(this.config);
+        this.transformer = new YbTransformer(this.config);
         this.start();
     }
 
@@ -49,11 +50,13 @@ export class YbScanner {
             }
         }
         this.processor.start();
+        this.transformer.start();
     }
 
     stop() {
         this.stopping = true;
         this.scanner.stop();
+        this.transformer.stop();
     }
 
     async scanLibrary(lib: LibraryType, interval: number) {

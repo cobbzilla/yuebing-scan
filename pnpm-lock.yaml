@@ -62,12 +62,18 @@ devDependencies:
   typescript:
     specifier: ^5.1.6
     version: 5.1.6
+  yuebing-media:
+    specifier: ^1.0.31
+    version: 1.0.31
+  yuebing-media-video:
+    specifier: ^1.0.24
+    version: 1.0.24
   yuebing-messages:
     specifier: ^2.1.7
     version: 2.1.7
   yuebing-model:
-    specifier: ^2.6.24
-    version: 2.6.24
+    specifier: ^2.7.6
+    version: 2.7.6
 
 packages:
 
@@ -1672,12 +1678,20 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /yuebing-media-video@1.0.24:
+    resolution: {integrity: sha512-3Ut/BDCdoYDB35Z1S5DPqM5/xKF0BMcUzt8hoHM9Jd4exGbIp+P13283XW2l1EOIXBuIXItn9go2Uwm9NA2Jvw==}
+    dev: true
+
+  /yuebing-media@1.0.31:
+    resolution: {integrity: sha512-Dmlm1zM/z5oZcdFqJ+duiHu5FDYOxcmr9mfGD1zu9UQQCjJhDCv1KFg2QuhO+poOz4eRGe51kwJmxjCcL2aeBA==}
+    dev: true
+
   /yuebing-messages@2.1.7:
     resolution: {integrity: sha512-ZIuQuiiXcIHRKkxUCYgO3hafUSlDjbfKDfW0UED2vhGHVtvUzNNTylQREX22HQAhEYcTdNEW2eY17xQ10E1Hbw==}
     dependencies:
       hokey-runtime: 1.0.4
     dev: true
 
-  /yuebing-model@2.6.24:
-    resolution: {integrity: sha512-ZXnq0fAHCTaGcMWU6jq2psT5o3rSv6EWKIQgfNLMc1RqtVkLt5qnLlJY5JaGatozEQn/tdkTkFXqpySdG2K0CA==}
+  /yuebing-model@2.7.6:
+    resolution: {integrity: sha512-9hci8v6OFX4vZp+TiisU016TRPbAHBBuS6W6lc2zYWwzedY6Dw4Xqrey4XRElmNbRY53dZBwrvtsbxnU47Xt6w==}
     dev: true

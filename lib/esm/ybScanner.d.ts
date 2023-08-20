@@ -2,9 +2,9 @@ import { LibraryType } from "yuebing-model";
 import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { YbScanConfig } from "./config.js";
-import { YbProcessor } from "./ybProcessor.js";
+import { YbAnalyzer } from "./ybAnalyzer.js";
+import { YbTransformer } from "./ybTransformer.js";
 export declare const DEFAULT_SCAN_CHECK_INTERVAL: number;
-export declare const ASSET_SEP = ">";
 export declare class YbScanner {
     readonly config: YbScanConfig;
     readonly scanCheckInterval: number;
@@ -14,7 +14,8 @@ export declare class YbScanner {
     running: boolean;
     stopping: boolean;
     readonly scanner: MobilettoScanner;
-    readonly processor: YbProcessor;
+    readonly processor: YbAnalyzer;
+    readonly transformer: YbTransformer;
     constructor(config: YbScanConfig);
     start(): void;
     stop(): void;
