@@ -55,12 +55,15 @@ export class YbAnalyzer {
             lock.owner = this.config.systemName; // should be the same, but whatever
             lock.status = "finished";
             lock.finished = this.clock.now();
-            console.info(`transform: updating finished sourceAsset: ${JSON.stringify(lock)}`);
+            console.info(`analyze: updating finished sourceAsset: ${JSON.stringify(lock)}`);
             lockRepo.update(lock).then((l) => {
                 this.config.logger.info(`finished: ${JSON.stringify(l)}`);
             });
+            return true;
+        } else {
+            this.config.logger.error(`analyze: analyzeSourceAsset error: sourceAsset=${JSON.stringify(lock)}`);
+            return false;
         }
-        return true;
     }
 }
 
@@ -80,7 +83,7 @@ const ybAnalyzeLoop = async (analyzer: YbAnalyzer) => {
                     await sleep(analyzer.analyzerPollInterval + jitter);
                 }
             } catch (e) {
-                analyzer.config.logger.error(`ybProcessLoop: error=${e}`);
+                analyzer.config.logger.error(`ybAnalyzeLoop: error=${e}`);
             }
         }
     } finally {

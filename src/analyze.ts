@@ -140,7 +140,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
     const jobRepo = analyzer.config.profileJobRepo();
     for (const transformProfile of transformProfiles) {
         const jobName = profileJobName(sourceAsset, transformProfile);
-        const foundJob = jobRepo.safeFindById(jobName);
+        const foundJob = await jobRepo.safeFindById(jobName);
         if (!foundJob) {
             const profileJob: ProfileJobType = {
                 name: jobName,
@@ -156,6 +156,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
     const jobsDone: Record<string, boolean> = {};
     transformProfiles.forEach((p) => (jobsDone[p.name] = false));
     while (Object.values(jobsDone).filter((o) => o).length < transformProfiles.length) {
+        await sleep(analyzer.analyzerPollInterval);
         const jobs = (await jobRepo.safeFindBy("asset", sourceAsset.name)) as ProfileJobType[];
         if (jobs && jobs.length > 0) {
             for (const job of jobs) {
@@ -164,7 +165,6 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
                 }
             }
         }
-        await sleep(1000 * 60);
     }
     return true;
 };

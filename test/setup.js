@@ -44,15 +44,20 @@ const countWordsInFile = async (filePath) => {
     return data.trim().split(/\s+/).length;
 };
 
+export const OP_WORDCOUNT = "wordCount";
+export const OP_UPCASE = "uppercase";
+
 const mediaDriver = {
-    applyProfile: async (downloaded, profile) => {
+    applyProfile: async (downloaded, profile, props, outDir) => {
         if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
         if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
         if (!profile.operation) throw new Error(`applyProfile: no operation defined for profile: ${profile.name}`);
-        if (profile.operation === "wordCount") {
+        if (profile.operation === OP_WORDCOUNT) {
             return {
                 analysis: await countWordsInFile(downloaded),
             };
+        } else if (profile.operation === OP_UPCASE) {
+            return { args: [downloaded, outDir] };
         } else {
             throw new Error(`invalid operation: ${profile.operation}`);
         }
@@ -63,7 +68,9 @@ const mediaDriver = {
 let storageDriverRegistered = false;
 let mediaDriverRegistered = false;
 
-export const newTest = async (adjustConfig) => {
+export const ANALYSIS_PROFILE_NAME = "wordCounter";
+
+export const newTest = async (adjustTest) => {
     if (!storageDriverRegistered) {
         registerDriver("local", localDriver);
         storageDriverRegistered = true;
@@ -104,6 +111,7 @@ export const newTest = async (adjustConfig) => {
     });
     tmp.name = "tmp";
 
+    test.testDir = __dirname;
     test.factory = repositoryFactory([tmp]);
     test.sourceRepo = test.factory.repository(SourceTypeDef);
     test.destinationRepo = test.factory.repository(DestinationTypeDef);
@@ -130,6 +138,7 @@ export const newTest = async (adjustConfig) => {
     test.destination = {
         name: "tempDestination",
         type: "local",
+        scope: "local",
         local: { key: test.tempDir },
     };
     test.destination = await test.destinationRepo.create(test.destination);
@@ -141,7 +150,7 @@ export const newTest = async (adjustConfig) => {
     test.media = await test.mediaRepo.create(test.media);
 
     test.mediaOperation = {
-        name: "wordCount",
+        name: OP_WORDCOUNT,
         media: "textMedia",
         analysis: true,
         func: true,
@@ -150,21 +159,11 @@ export const newTest = async (adjustConfig) => {
     test.mediaOperation = await test.mediaOperationRepo.create(test.mediaOperation);
 
     test.mediaProfile = {
-        name: "wordCounter",
+        name: ANALYSIS_PROFILE_NAME,
         media: "textMedia",
-        operation: "wordCount",
+        operation: OP_WORDCOUNT,
     };
     test.mediaProfile = await test.mediaProfileRepo.create(test.mediaProfile);
-
-    if (!mediaDriverRegistered) {
-        await registerMediaDriver(
-            test.media,
-            mediaDriver,
-            test.mediaProfileRepo,
-            test.mediaOperationRepo,
-            test.mediaPropertyRepo,
-        );
-    }
 
     test.library = {
         name: "tempLibrary",
@@ -201,6 +200,7 @@ export const newTest = async (adjustConfig) => {
         mediaRepo: () => test.mediaRepo,
         mediaProfileRepo: () => test.mediaProfileRepo,
         sourceRepo: () => test.sourceRepo,
+        destinationRepo: () => test.destinationRepo,
         libraryRepo: () => test.libraryRepo,
         libraryScanRepo: () => test.libraryScanRepo,
         sourceScanRepo: () => test.sourceScanRepo,
@@ -215,14 +215,24 @@ export const newTest = async (adjustConfig) => {
         runUploader: false,
         scanPollInterval: 1000,
         analyzerPollInterval: 1000,
-        transformPollInterval: 1000,
+        transformerPollInterval: 1000,
         uploaderPollInterval: 1000,
     };
     test.assetName = test.source.name + ASSET_SEP + "sample.txt";
 
-    if (adjustConfig) adjustConfig(test.scanConfig);
-    test.scanner = new YbScanner(test.scanConfig);
+    if (adjustTest) await adjustTest(test);
 
+    if (!mediaDriverRegistered) {
+        await registerMediaDriver(
+            test.media,
+            mediaDriver,
+            test.mediaProfileRepo,
+            test.mediaOperationRepo,
+            test.mediaPropertyRepo,
+        );
+    }
+
+    test.scanner = new YbScanner(test.scanConfig);
     return test;
 };
 

@@ -75,7 +75,7 @@ const uploadAsset = async (
     const destRepo = uploader.config.destinationRepo();
     const dest = await destRepo.findById(job.destination);
     const conn = await connectVolume(dest);
-    const destPath = destinationPath(job.sourceAsset, job.media, job.profile, job.localPath);
+    const destPath = destinationPath(job.asset, job.media, job.profile, job.localPath);
     const reader = fs.createReadStream(job.localPath);
     await conn.write(destPath, reader);
 

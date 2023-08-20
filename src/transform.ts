@@ -1,9 +1,9 @@
 import * as fs from "fs";
-import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } from "yuebing-model";
 import { MobilettoLogger } from "mobiletto-common";
-import { applyProfile, ApplyProfileResponse, loadProfile, ParsedProfile } from "yuebing-media";
 import { basename } from "mobiletto-orm-typedef";
-import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
+import { sleep } from "mobiletto-orm-scan-typedef";
+import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } from "yuebing-model";
+import { applyProfile, ApplyProfileResponse, loadProfile, ParsedProfile } from "yuebing-media";
 import { prepareOutputDir, runExternalCommand } from "./util.js";
 import { acquireLock } from "./lock.js";
 import { downloadSourceAsset } from "./download.js";
@@ -17,7 +17,6 @@ export const execTransform = async (
     profile: ParsedProfile,
     job: ProfileJobType,
     logger: MobilettoLogger,
-    clock: MobilettoClock,
 ): Promise<string | null> => {
     if (!profile.operationObject) {
         logger.error(`execTransform: no profile.operationObject for profile=${profile.name}`);
@@ -46,11 +45,7 @@ export const execTransform = async (
             }
             // todo: record progress
             const result = await runExternalCommand(profile.operationObject.command, response.args);
-            if (result.exitCode === 0) {
-                job.status = "finished";
-                job.finished = clock.now();
-                job.analysis = result.stdout;
-            } else {
+            if (result.exitCode !== 0) {
                 logger.error(
                     `execTransform: exitCode=${result.exitCode} args=${response.args} profile=${profile.name} asset=${job.asset} stdout=${result.stdout} stderr=${result.stderr}`,
                 );
@@ -91,31 +86,24 @@ export const transformAsset = async (
 
     const profile = loadProfile(job.profile);
     if (!profile.media) {
-        xform.config.logger.warn(`ybTransformLoop: skipping profile without media: ${profile.name}`);
+        xform.config.logger.warn(`transformAsset: skipping profile without media: ${profile.name}`);
         return false;
     }
     if (!profile.enabled) {
         // job should not have been created
-        xform.config.logger.warn(`ybTransformLoop: skipping disabled profile: ${profile.name}`);
+        xform.config.logger.warn(`transformAsset: skipping disabled profile: ${profile.name}`);
         return false;
     }
     if (profile.noop) {
         // job should not have been created
-        xform.config.logger.warn(`ybTransformLoop: skipping noop profile: ${profile.name}`);
+        xform.config.logger.warn(`transformAsset: skipping noop profile: ${profile.name}`);
         return false;
     }
 
     // run the transform
-    const outDir = await execTransform(
-        xform.config.assetDir,
-        downloaded,
-        profile,
-        job,
-        xform.config.logger,
-        xform.clock,
-    );
+    const outDir = await execTransform(xform.config.assetDir, downloaded, profile, job, xform.config.logger);
     if (!outDir) {
-        xform.config.logger.warn("ybTransformLoop: no outDir returned from execTransform");
+        xform.config.logger.warn("transformAsset: no outDir returned from execTransform");
         return false;
     }
 
@@ -125,6 +113,8 @@ export const transformAsset = async (
     const toUpload: string[] = [];
     if (extFiles && extFiles.length > 0) {
         toUpload.push(...extFiles);
+    } else {
+        xform.config.logger.warn(`transformAsset: no extFiles matched ext=${profile.ext} for profile ${profile.name}`);
     }
     if (profile.additionalAssetsRegexes && profile.additionalAssetsRegexes.length > 0) {
         for (const re of profile.additionalAssetsRegexes) {
@@ -139,7 +129,7 @@ export const transformAsset = async (
         for (const path of uploadSet) {
             const uploadJob: UploadJobType = {
                 localPath: `${outDir}/${path}`,
-                sourceAsset: job.asset,
+                asset: job.asset,
                 media: profile.media,
                 profile: profile.name,
                 destination: dest.name,
@@ -152,6 +142,10 @@ export const transformAsset = async (
     // wait for uploads to finish
     for (;;) {
         const jobs = (await uploadJobRepo.safeFindBy("sourceAsset", job.asset)) as UploadJobType[];
+        if (jobs.length === 0) {
+            xform.config.logger.info(`transform: error finding upload jobs for asset: ${job.asset}`);
+            return false;
+        }
         const unfinished = jobs.filter((j) => j.status !== "finished");
         if (unfinished.length === 0) break;
         xform.config.logger.info(`waiting for ${unfinished.length} upload jobs to finish`);

@@ -6,8 +6,7 @@ import { ParsedProfile } from "yuebing-media";
 
 export const prepareOutputDir = (assetDir: string, downloaded: string, profile: ParsedProfile): string => {
     const outDir = `${assetDir}/${profile.name}/${sha(downloaded)}`;
-    const dirStat = !fs.statSync(outDir, { throwIfNoEntry: false });
-    if (!dirStat) {
+    if (!fs.existsSync(outDir)) {
         fs.mkdirSync(outDir, { recursive: true });
     }
     return outDir;
@@ -25,6 +24,7 @@ export type SpawnResult = {
 
 export const runExternalCommand = async (command: string, args: string[]): Promise<SpawnResult> => {
     return new Promise((resolve, reject) => {
+        if (typeof args === "string") args = [args];
         const process = spawn(command, args);
 
         let stdout = "";

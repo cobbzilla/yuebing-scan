@@ -6,7 +6,7 @@ import { waitForNonemptyQuery, newTest } from "./setup.js";
 let test;
 
 before(async () => {
-    test = await newTest((cfg) => (cfg.runAnalyzer = true));
+    test = await newTest((test) => (test.scanConfig.runAnalyzer = true));
 });
 
 describe("analyze test", async () => {
@@ -21,7 +21,6 @@ describe("analyze test", async () => {
         const finishedScans = await waitForNonemptyQuery(
             () => test.sourceAssetRepo.findAll(),
             (a) => a.status === "finished",
-            60 * 1000 * 10,
         );
         expect(finishedScans).is.not.null;
         expect(finishedScans.length).eq(1);
@@ -35,11 +34,9 @@ describe("analyze test", async () => {
         expect(analyzed[0].status).eq("finished");
         expect(analyzed[0].finished).is.not.null;
         expect(analyzed[0].finished).gt(analyzed[0].started);
-        console.log(`>>>>> finishedScans is ${JSON.stringify(finishedScans)}`);
         expect(analyzed[0].finished).gt(finishedScans[0].started);
         expect(analyzed[0].analysis).is.not.null;
         expect(analyzed[0].analysis).is.not.undefined;
-        console.log(`analyzed[0] is ${JSON.stringify(analyzed[0])}`);
         const analysis = JSON.parse(analyzed[0].analysis);
         expect(analysis).eq(5);
     });
