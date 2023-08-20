@@ -8,7 +8,7 @@ import { YbUploader } from "./ybUploader.js";
 export declare const DEFAULT_SCAN_CHECK_INTERVAL: number;
 export declare class YbScanner {
     readonly config: YbScanConfig;
-    readonly scanCheckInterval: number;
+    readonly scanPollInterval: number;
     readonly clock: MobilettoClock;
     readonly initTime: number;
     timeout: number | object | null;

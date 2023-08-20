@@ -15,7 +15,7 @@ export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 
 export class YbScanner {
     readonly config: YbScanConfig;
-    readonly scanCheckInterval: number;
+    readonly scanPollInterval: number;
     readonly clock: MobilettoClock;
     readonly initTime: number;
 
@@ -34,10 +34,10 @@ export class YbScanner {
 
     constructor(config: YbScanConfig) {
         this.config = config;
-        this.scanCheckInterval = config.scanCheckInterval ? config.scanCheckInterval : DEFAULT_SCAN_CHECK_INTERVAL;
+        this.scanPollInterval = config.scanPollInterval ? config.scanPollInterval : DEFAULT_SCAN_CHECK_INTERVAL;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
         this.initTime = this.clock.now();
-        this.scanner = new MobilettoScanner(this.config.systemName, this.scanCheckInterval, this.clock);
+        this.scanner = new MobilettoScanner(this.config.systemName, this.scanPollInterval, this.clock);
         this.analyzer = new YbAnalyzer(this.config);
         this.runAnalyzer = this.config.runAnalyzer !== false;
         this.transformer = new YbTransformer(this.config);
@@ -65,6 +65,7 @@ export class YbScanner {
     stop() {
         this.stopping = true;
         this.scanner.stop();
+        this.analyzer.stop();
         this.transformer.stop();
         this.uploader.stop();
     }
@@ -128,8 +129,8 @@ export class YbScanner {
         } finally {
             if (lock) {
                 lock.owner = this.config.systemName; // should be the same, but whatever
-                lock.finished = this.clock.now();
                 lock.status = "finished";
+                lock.finished = this.clock.now();
                 console.info(`transform: updating finished libraryScan: ${JSON.stringify(lock)}`);
                 this.config
                     .libraryScanRepo()
@@ -167,7 +168,7 @@ export class YbScanner {
                         await sourceAssetRepo.create(asset);
                     }
                 } catch (e) {
-                    this.config.logger.warn(`error creating DiscoveredAsset name=${fullName} error=${e}`);
+                    this.config.logger.warn(`error creating SourceAsset name=${fullName} error=${e}`);
                 }
                 return meta;
             },

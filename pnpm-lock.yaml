@@ -39,8 +39,8 @@ devDependencies:
     specifier: ^2.0.15
     version: 2.0.15
   mobiletto-orm:
-    specifier: ^2.2.38
-    version: 2.2.38
+    specifier: ^2.2.39
+    version: 2.2.39
   mobiletto-orm-scan:
     specifier: ^1.0.13
     version: 1.0.13
@@ -63,17 +63,17 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   yuebing-media:
+    specifier: ^1.0.38
+    version: 1.0.38
+  yuebing-media-video:
     specifier: ^1.0.31
     version: 1.0.31
-  yuebing-media-video:
-    specifier: ^1.0.24
-    version: 1.0.24
   yuebing-messages:
     specifier: ^2.1.7
     version: 2.1.7
   yuebing-model:
-    specifier: ^2.7.6
-    version: 2.7.6
+    specifier: ^2.7.13
+    version: 2.7.13
 
 packages:
 
@@ -1203,8 +1203,8 @@ packages:
       uuid: 9.0.0
     dev: true
 
-  /mobiletto-orm@2.2.38:
-    resolution: {integrity: sha512-YP0hKye9eEpZMxvM5VhTZxXxKtICj1G5U9xQc8NzlpoxQFV2um1ldYw8ww83UEXn4dbD6EMSowE09/pU5GnJsQ==}
+  /mobiletto-orm@2.2.39:
+    resolution: {integrity: sha512-WHUbDtf4va7Xeg7KmwLSfHZMS8Y4vOfOXw2rJF7DNMlAjCAlAEwO7X1wqkQOouZIxklj65EkykRQ8P4N3Az22Q==}
     dev: true
 
   /mocha@10.2.0:
@@ -1678,12 +1678,12 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /yuebing-media-video@1.0.24:
-    resolution: {integrity: sha512-3Ut/BDCdoYDB35Z1S5DPqM5/xKF0BMcUzt8hoHM9Jd4exGbIp+P13283XW2l1EOIXBuIXItn9go2Uwm9NA2Jvw==}
+  /yuebing-media-video@1.0.31:
+    resolution: {integrity: sha512-rLwYx0A0IRMDh/rehKqGmGgb3S/PfDsNQ8myVE5gvH9ibj+8RutsmEP95+do6svG15Crw9OJxAXi1lylGTJ2/A==}
     dev: true
 
-  /yuebing-media@1.0.31:
-    resolution: {integrity: sha512-Dmlm1zM/z5oZcdFqJ+duiHu5FDYOxcmr9mfGD1zu9UQQCjJhDCv1KFg2QuhO+poOz4eRGe51kwJmxjCcL2aeBA==}
+  /yuebing-media@1.0.38:
+    resolution: {integrity: sha512-JwJvy1LKKw+/iIkV5WmfgXEr6yovqGsongBZxCR0UqW4iJWnjeMbfMqpn8E9pKF3YqD8qucoG8v8+wJtscH0Lg==}
     dev: true
 
   /yuebing-messages@2.1.7:
@@ -1692,6 +1692,6 @@ packages:
       hokey-runtime: 1.0.4
     dev: true
 
-  /yuebing-model@2.7.6:
-    resolution: {integrity: sha512-9hci8v6OFX4vZp+TiisU016TRPbAHBBuS6W6lc2zYWwzedY6Dw4Xqrey4XRElmNbRY53dZBwrvtsbxnU47Xt6w==}
+  /yuebing-model@2.7.13:
+    resolution: {integrity: sha512-xcaw1+O6kVhv6BVFsdrpKRWaQIXCcx2ZHURw+jpqMQ53nNsYqYSukWg2OIbhfvT6c4wBUvS2I6ZUenm5f823Ew==}
     dev: true

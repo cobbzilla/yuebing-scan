@@ -3,7 +3,7 @@ import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } fro
 import { MobilettoLogger } from "mobiletto-common";
 import { applyProfile, ApplyProfileResponse, loadProfile, ParsedProfile } from "yuebing-media";
 import { basename } from "mobiletto-orm-typedef";
-import { sleep } from "mobiletto-orm-scan-typedef";
+import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { prepareOutputDir, runExternalCommand } from "./util.js";
 import { acquireLock } from "./lock.js";
 import { downloadSourceAsset } from "./download.js";
@@ -17,6 +17,7 @@ export const execTransform = async (
     profile: ParsedProfile,
     job: ProfileJobType,
     logger: MobilettoLogger,
+    clock: MobilettoClock,
 ): Promise<string | null> => {
     if (!profile.operationObject) {
         logger.error(`execTransform: no profile.operationObject for profile=${profile.name}`);
@@ -39,10 +40,15 @@ export const execTransform = async (
         }
     } else {
         if (response.args && response.args.length > 0) {
+            if (!profile.operationObject.command) {
+                logger.error(`execAnalyze: no profile.operationObject.command for profile=${profile.name}`);
+                return null;
+            }
             // todo: record progress
             const result = await runExternalCommand(profile.operationObject.command, response.args);
             if (result.exitCode === 0) {
                 job.status = "finished";
+                job.finished = clock.now();
                 job.analysis = result.stdout;
             } else {
                 logger.error(
@@ -100,7 +106,14 @@ export const transformAsset = async (
     }
 
     // run the transform
-    const outDir = await execTransform(xform.config.assetDir, downloaded, profile, job, xform.config.logger);
+    const outDir = await execTransform(
+        xform.config.assetDir,
+        downloaded,
+        profile,
+        job,
+        xform.config.logger,
+        xform.clock,
+    );
     if (!outDir) {
         xform.config.logger.warn("ybTransformLoop: no outDir returned from execTransform");
         return false;
@@ -147,8 +160,8 @@ export const transformAsset = async (
 
     // update lock, mark finished
     lock.owner = xform.config.systemName; // should be the same, but whatever
-    lock.finished = xform.clock.now();
     lock.status = "finished";
+    lock.finished = xform.clock.now();
     console.info(`transform: updating finished profileJob: ${JSON.stringify(lock)}`);
     jobRepo.update(lock).then((l) => {
         xform.config.logger.info(`finished: ${JSON.stringify(l)}`);

@@ -30,7 +30,7 @@ export class YbAnalyzer {
                 this.config.logger.info(`YbAnalyzer.start: already running (but timeout was null?)`);
             } else {
                 this.running = true;
-                this.timeout = setTimeout(() => ybProcessLoop(this), 1);
+                this.timeout = setTimeout(() => ybAnalyzeLoop(this), 1);
             }
         }
     }
@@ -50,32 +50,32 @@ export class YbAnalyzer {
         );
         if (!lock) return false;
 
-        await analyzeSourceAsset(this, lock);
-
-        // update lock, mark finished
-        lock.owner = this.config.systemName; // should be the same, but whatever
-        lock.finished = this.clock.now();
-        lock.status = "finished";
-        console.info(`transform: updating finished sourceAsset: ${JSON.stringify(lock)}`);
-        lockRepo.update(lock).then((l) => {
-            this.config.logger.info(`finished: ${JSON.stringify(l)}`);
-        });
+        if (await analyzeSourceAsset(this, lock)) {
+            // update lock, mark finished
+            lock.owner = this.config.systemName; // should be the same, but whatever
+            lock.status = "finished";
+            lock.finished = this.clock.now();
+            console.info(`transform: updating finished sourceAsset: ${JSON.stringify(lock)}`);
+            lockRepo.update(lock).then((l) => {
+                this.config.logger.info(`finished: ${JSON.stringify(l)}`);
+            });
+        }
         return true;
     }
 }
 
-const ybProcessLoop = async (analyzer: YbAnalyzer) => {
+const ybAnalyzeLoop = async (analyzer: YbAnalyzer) => {
     try {
         while (!analyzer.stopping) {
             try {
                 const srcAssetRepo = analyzer.config.sourceAssetRepo();
-                const discovered = await srcAssetRepo.safeFindFirstBy("status", "pending");
+                const pendingAssets = await srcAssetRepo.safeFindFirstBy("status", "pending");
                 if (analyzer.stopping) break;
                 let processed = false;
-                if (discovered) {
-                    processed = await analyzer.downloadAndProcess(discovered);
+                if (pendingAssets) {
+                    processed = await analyzer.downloadAndProcess(pendingAssets);
                 }
-                if (!discovered || !processed) {
+                if (!pendingAssets || !processed) {
                     const jitter = Math.floor(analyzer.analyzerPollInterval * (Math.random() * 0.5 + 0.1));
                     await sleep(analyzer.analyzerPollInterval + jitter);
                 }
@@ -85,7 +85,7 @@ const ybProcessLoop = async (analyzer: YbAnalyzer) => {
         }
     } finally {
         if (!analyzer.stopping) {
-            analyzer.config.logger.warn("ybProcessLoop: loop ending without stopping === true");
+            analyzer.config.logger.warn("ybAnalyzeLoop: loop ending without stopping === true");
             analyzer.stopping = true;
         }
         analyzer.timeout = null;

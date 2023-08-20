@@ -3,25 +3,33 @@ import * as os from "os";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { rand, repositoryFactory } from "mobiletto-orm";
-import { logger, mobiletto } from "mobiletto-base";
+import { logger, mobiletto, registerDriver } from "mobiletto-base";
+import { storageClient as localDriver } from "mobiletto-driver-local";
+
 import {
     resolveConnectionConfig,
     DestinationTypeDef,
     LibraryScanTypeDef,
     LibraryTypeDef,
     LocalConfigTypeDef,
-    MediaProfileTypeDef,
     MediaTypeDef,
+    MediaPropertyTypeDef,
+    MediaOperationTypeDef,
+    MediaProfileTypeDef,
     ProfileJobTypeDef,
     SourceAssetTypeDef,
     SourceScanTypeDef,
     SourceTypeDef,
     UploadJobTypeDef,
 } from "yuebing-model";
+import { sleep } from "mobiletto-orm-scan-typedef";
+import { ASSET_SEP, registerMediaDriver } from "yuebing-media";
+import { YbScanner } from "../lib/esm/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const ensureDir = (dir) => {
+const ensureUniqueDir = (dir) => {
+    dir += `_${rand(6)}`;
     const stat = fs.statSync(dir, { throwIfNoEntry: false });
     if (!stat) {
         fs.mkdirSync(dir, { recursive: true });
@@ -29,7 +37,37 @@ const ensureDir = (dir) => {
     return dir;
 };
 
-export const newTest = async () => {
+const countWordsInFile = async (filePath) => {
+    // advance clock so that not everything happens in the same millisecond
+    await sleep(5);
+    const data = fs.readFileSync(filePath, "utf8");
+    return data.trim().split(/\s+/).length;
+};
+
+const mediaDriver = {
+    applyProfile: async (downloaded, profile) => {
+        if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
+        if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
+        if (!profile.operation) throw new Error(`applyProfile: no operation defined for profile: ${profile.name}`);
+        if (profile.operation === "wordCount") {
+            return {
+                analysis: await countWordsInFile(downloaded),
+            };
+        } else {
+            throw new Error(`invalid operation: ${profile.operation}`);
+        }
+    },
+    operationConfigType: () => undefined,
+};
+
+let storageDriverRegistered = false;
+let mediaDriverRegistered = false;
+
+export const newTest = async (adjustConfig) => {
+    if (!storageDriverRegistered) {
+        registerDriver("local", localDriver);
+        storageDriverRegistered = true;
+    }
     logger.setLogLevel("info");
 
     const test = {
@@ -41,6 +79,7 @@ export const newTest = async () => {
         mediaRepo: null,
         mediaProfileRepo: null,
         mediaOperationRepo: null,
+        mediaPropertyRepo: null,
         localConfigRepo: null,
         libraryScanRepo: null,
         sourceScanRepo: null,
@@ -69,6 +108,8 @@ export const newTest = async () => {
     test.sourceRepo = test.factory.repository(SourceTypeDef);
     test.destinationRepo = test.factory.repository(DestinationTypeDef);
     test.mediaRepo = test.factory.repository(MediaTypeDef);
+    test.mediaOperationRepo = test.factory.repository(MediaOperationTypeDef);
+    test.mediaPropertyRepo = test.factory.repository(MediaPropertyTypeDef);
     test.mediaProfileRepo = test.factory.repository(MediaProfileTypeDef);
     test.libraryRepo = test.factory.repository(LibraryTypeDef);
     test.localConfigRepo = test.factory.repository(LocalConfigTypeDef);
@@ -77,27 +118,53 @@ export const newTest = async () => {
     test.sourceAssetRepo = test.factory.repository(SourceAssetTypeDef);
     test.profileJobRepo = test.factory.repository(ProfileJobTypeDef);
     test.uploadJobRepo = test.factory.repository(UploadJobTypeDef);
-    test.downloadDir = ensureDir("/tmp/yb_test/download");
-    test.assetDir = ensureDir("/tmp/yb_test/asset");
+    test.downloadDir = ensureUniqueDir("/tmp/yb_test/download");
+    test.assetDir = ensureUniqueDir("/tmp/yb_test/asset");
     test.source = {
         name: "tempSource",
         type: "local",
         local: { key: srcDir },
     };
-    await test.sourceRepo.create(test.source);
+    test.source = await test.sourceRepo.create(test.source);
 
     test.destination = {
         name: "tempDestination",
         type: "local",
         local: { key: test.tempDir },
     };
-    await test.destinationRepo.create(test.destination);
+    test.destination = await test.destinationRepo.create(test.destination);
 
     test.media = {
         name: "textMedia",
         ext: ["txt"],
     };
-    await test.mediaRepo.create(test.media);
+    test.media = await test.mediaRepo.create(test.media);
+
+    test.mediaOperation = {
+        name: "wordCount",
+        media: "textMedia",
+        analysis: true,
+        func: true,
+        minFileSize: 0,
+    };
+    test.mediaOperation = await test.mediaOperationRepo.create(test.mediaOperation);
+
+    test.mediaProfile = {
+        name: "wordCounter",
+        media: "textMedia",
+        operation: "wordCount",
+    };
+    test.mediaProfile = await test.mediaProfileRepo.create(test.mediaProfile);
+
+    if (!mediaDriverRegistered) {
+        await registerMediaDriver(
+            test.media,
+            mediaDriver,
+            test.mediaProfileRepo,
+            test.mediaOperationRepo,
+            test.mediaPropertyRepo,
+        );
+    }
 
     test.library = {
         name: "tempLibrary",
@@ -107,7 +174,7 @@ export const newTest = async () => {
         autoscanEnabled: true,
         autoscan: { interval: 10000 },
     };
-    await test.libraryRepo.create(test.library);
+    test.library = await test.libraryRepo.create(test.library);
 
     test.connectionConfig = resolveConnectionConfig(test.source);
     test.sourceConnections = {
@@ -125,12 +192,11 @@ export const newTest = async () => {
         autoscanEnabled: true,
         autoscan: { initialDelay: 10000 },
     };
-    await test.localConfigRepo.create(test.localConfig);
+    test.localConfig = await test.localConfigRepo.create(test.localConfig);
 
-    test.scanConfig = () => ({
+    test.scanConfig = {
         systemName: test.localConfig.systemName,
         localConfigRepo: () => test.localConfigRepo,
-        scanCheckInterval: 1000,
         logger,
         mediaRepo: () => test.mediaRepo,
         mediaProfileRepo: () => test.mediaProfileRepo,
@@ -147,6 +213,29 @@ export const newTest = async () => {
         runAnalyzer: false,
         runTransformer: false,
         runUploader: false,
-    });
+        scanPollInterval: 1000,
+        analyzerPollInterval: 1000,
+        transformPollInterval: 1000,
+        uploaderPollInterval: 1000,
+    };
+    test.assetName = test.source.name + ASSET_SEP + "sample.txt";
+
+    if (adjustConfig) adjustConfig(test.scanConfig);
+    test.scanner = new YbScanner(test.scanConfig);
+
     return test;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const waitForNonemptyQuery = async (query, predicate = (x) => true, timeout = 10000, count = 1) => {
+    let start = Date.now();
+    while (Date.now() - start < timeout) {
+        await sleep(3000);
+        const found = await query();
+        if (found && found.length >= count) {
+            const matched = found.filter(predicate);
+            if (matched.length > 0) return matched;
+        }
+    }
+    return null;
 };

@@ -18,7 +18,6 @@ import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 
 export type YbScanConfig = {
     systemName: string;
-    scanCheckInterval?: number;
     logger: MobilettoLogger;
     localConfigRepo: () => MobilettoOrmRepository<LocalConfigType>;
     mediaRepo: () => MobilettoOrmRepository<MediaType>;
@@ -35,6 +34,7 @@ export type YbScanConfig = {
     downloadDir: string;
     assetDir: string;
     clock?: MobilettoClock;
+    scanPollInterval?: number;
     analyzerPollInterval?: number;
     transformerPollInterval?: number;
     uploaderPollInterval?: number;

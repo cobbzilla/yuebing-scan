@@ -6,7 +6,7 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
     let first = true;
     try {
         while (!ybScan.stopping) {
-            if (!first) await sleep(ybScan.scanCheckInterval);
+            if (!first) await sleep(ybScan.scanPollInterval);
             else first = false;
 
             try {

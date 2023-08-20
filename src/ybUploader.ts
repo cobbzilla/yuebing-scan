@@ -81,8 +81,8 @@ const uploadAsset = async (
 
     // update lock, mark finished
     job.owner = uploader.config.systemName; // should be the same, but whatever
-    job.finished = uploader.clock.now();
     job.status = "finished";
+    job.finished = uploader.clock.now();
     console.info(`YbUploader: updating finished uploadJob: ${JSON.stringify(job)}`);
     uploadJobRepo.update(job).then((l) => {
         uploader.config.logger.info(`finished: ${JSON.stringify(l)}`);

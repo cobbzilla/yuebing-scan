@@ -1,5 +1,5 @@
 import { MobilettoLogger } from "mobiletto-common";
-import { sleep } from "mobiletto-orm-scan-typedef";
+import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
 import { applyProfile, ApplyProfileResponse, fileExtWithoutDot, loadProfile, ParsedProfile } from "yuebing-media";
 import { profileJobName, prepareOutputDir, runExternalCommand } from "./util.js";
@@ -13,6 +13,7 @@ const execAnalyze = async (
     profileJob: ProfileJobType,
     logger: MobilettoLogger,
     sourceAsset: SourceAssetType,
+    clock: MobilettoClock,
 ): Promise<ProfileJobType | null> => {
     if (!profile.operationObject) {
         logger.error(`execAnalyze: no profile.operationObject for profile=${profile.name}`);
@@ -28,17 +29,22 @@ const execAnalyze = async (
         // applyProfile actually ran the job, we should be done
         if (response.analysis) {
             profileJob.status = "finished";
-            profileJob.analysis =
-                typeof response.analysis === "string" ? response.analysis : JSON.stringify(response.analysis);
+            profileJob.finished = clock.now();
+            profileJob.analysis = JSON.stringify(response.analysis);
         } else {
             logger.error(`execAnalyze: analysis=null profile=${profile.name} asset=${sourceAsset.name}`);
             return null;
         }
     } else {
         if (response.args && response.args.length > 0) {
+            if (!profile.operationObject.command) {
+                logger.error(`execAnalyze: no profile.operationObject.command for profile=${profile.name}`);
+                return null;
+            }
             const result = await runExternalCommand(profile.operationObject.command, response.args);
             if (result.exitCode === 0) {
                 profileJob.status = "finished";
+                profileJob.finished = clock.now();
                 profileJob.analysis = result.stdout;
             } else {
                 logger.error(
@@ -55,26 +61,26 @@ const execAnalyze = async (
 };
 
 export const analyzeAsset = async (
-    processor: YbAnalyzer,
+    analyzer: YbAnalyzer,
     sourceAsset: SourceAssetType,
     downloaded: string,
     profile: ParsedProfile,
 ) => {
-    const assetDir = processor.config.assetDir;
+    const assetDir = analyzer.config.assetDir;
     if (!profile.operationObject || !assetDir) return null; // should never happen
 
     const jobName = profileJobName(sourceAsset, profile);
 
-    const profileJobRepo = processor.config.profileJobRepo();
+    const profileJobRepo = analyzer.config.profileJobRepo();
     const profileJob: ProfileJobType = {
         name: jobName,
         profile: profile.name,
         asset: sourceAsset.name,
-        owner: processor.config.systemName,
+        owner: analyzer.config.systemName,
         status: "started",
-        started: processor.clock.now(),
+        started: analyzer.clock.now(),
     };
-    await execAnalyze(assetDir, downloaded, profile, profileJob, processor.config.logger, sourceAsset);
+    await execAnalyze(assetDir, downloaded, profile, profileJob, analyzer.config.logger, sourceAsset, analyzer.clock);
     const existingAnalysis = await profileJobRepo.safeFindById(jobName);
     if (existingAnalysis) {
         console.info(
@@ -89,18 +95,18 @@ export const analyzeAsset = async (
     }
 };
 
-export const analyzeSourceAsset = async (processor: YbAnalyzer, sourceAsset: SourceAssetType) => {
+export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: SourceAssetType) => {
     const downloaded = await downloadSourceAsset(
-        processor.config.downloadDir,
+        analyzer.config.downloadDir,
         sourceAsset,
-        processor.config.sourceRepo(),
-        processor.clock,
+        analyzer.config.sourceRepo(),
+        analyzer.clock,
     );
-    if (!downloaded) return; // source asset had no name, should never happen
+    if (!downloaded) return false; // source asset had no name, should never happen
 
     // which media types are interested in this file?
-    const mediaRepo = processor.config.mediaRepo();
-    const mediaProfileRepo = processor.config.mediaProfileRepo();
+    const mediaRepo = analyzer.config.mediaRepo();
+    const mediaProfileRepo = analyzer.config.mediaProfileRepo();
     const medias = (await mediaRepo.safeFindBy("ext", fileExtWithoutDot(downloaded))) as MediaType[];
     const analysisProfiles: ParsedProfile[] = [];
     const transformProfiles: ParsedProfile[] = [];
@@ -128,10 +134,10 @@ export const analyzeSourceAsset = async (processor: YbAnalyzer, sourceAsset: Sou
     }
 
     for (const analyzeProfile of analysisProfiles) {
-        await analyzeAsset(processor, sourceAsset, downloaded, analyzeProfile);
+        await analyzeAsset(analyzer, sourceAsset, downloaded, analyzeProfile);
     }
 
-    const jobRepo = processor.config.profileJobRepo();
+    const jobRepo = analyzer.config.profileJobRepo();
     for (const transformProfile of transformProfiles) {
         const jobName = profileJobName(sourceAsset, transformProfile);
         const foundJob = jobRepo.safeFindById(jobName);
@@ -160,4 +166,5 @@ export const analyzeSourceAsset = async (processor: YbAnalyzer, sourceAsset: Sou
         }
         await sleep(1000 * 60);
     }
+    return true;
 };

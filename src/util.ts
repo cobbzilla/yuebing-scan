@@ -14,7 +14,7 @@ export const prepareOutputDir = (assetDir: string, downloaded: string, profile: 
 };
 
 export const profileJobName = (sourceAsset: SourceAssetType, profile: ParsedProfile): string => {
-    return [profile.name, sourceAsset.source, basename(sourceAsset.name), sha(sourceAsset.name)].join(":");
+    return [profile.name, basename(sourceAsset.name), sha(sourceAsset.name)].join("~");
 };
 
 export type SpawnResult = {
