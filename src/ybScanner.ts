@@ -1,5 +1,5 @@
 import { MobilettoMetadata } from "mobiletto-common";
-import { SourceAssetType, LibraryScanType, LibraryType, LibraryTypeDef, MediaType } from "yuebing-model";
+import { SourceAssetType, LibraryScanType, LibraryType, MediaType, LibraryScanTypeDef } from "yuebing-model";
 import { MobilettoOrmObject } from "mobiletto-orm";
 import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
@@ -80,8 +80,8 @@ export class YbScanner {
                 this.clock,
                 this.config.logger,
                 this.config.libraryScanRepo(),
-                lib,
-                LibraryTypeDef,
+                lib.name,
+                LibraryScanTypeDef,
                 interval,
             );
             if (!lock) {
@@ -98,7 +98,7 @@ export class YbScanner {
                 const foundMedia: Record<string, MediaType> = {
                     [lib.media]: await this.config.mediaRepo().findById(lib.media),
                 };
-                const otherLibs = (await this.config.libraryRepo().safeFindBy("source", s, {
+                const otherLibs = (await this.config.libraryRepo().safeFindBy("sources", s, {
                     predicate: (x: MobilettoOrmObject) => x.name !== lib.name,
                 })) as LibraryType[];
                 for (const otherLib of otherLibs) {
@@ -117,11 +117,11 @@ export class YbScanner {
                     new Promise<void>((resolve, reject) => {
                         this.scanSource(s, fileExt)
                             .then(() => {
-                                console.info("sourceScan resolved");
+                                console.info(`YbScanner: scanSource finished: source=${JSON.stringify(s)}`);
                                 resolve();
                             })
                             .catch((e: Error) => {
-                                console.error("sourceScan rejected");
+                                console.error(`YbScanner: scanSource error: source=${JSON.stringify(s)} error=${e}`);
                                 reject(e);
                             });
                     }),
@@ -133,6 +133,7 @@ export class YbScanner {
                 lock.owner = this.config.systemName; // should be the same, but whatever
                 lock.finished = this.clock.now();
                 lock.status = "finished";
+                console.info(`transform: updating finished libraryScan: ${JSON.stringify(lock)}`);
                 this.config
                     .libraryScanRepo()
                     .update(lock)
@@ -157,15 +158,16 @@ export class YbScanner {
             visit: async (meta: MobilettoMetadata): Promise<unknown> => {
                 const fullName = sourceName + ASSET_SEP + meta.name;
                 try {
-                    const discoveredAssetRepo = this.config.sourceAssetRepo();
-                    if (!(await discoveredAssetRepo.safeFindById(fullName))) {
+                    const sourceAssetRepo = this.config.sourceAssetRepo();
+                    if (!(await sourceAssetRepo.safeFindById(fullName))) {
                         const asset: SourceAssetType = {
                             name: fullName,
                             source: sourceName,
                             owner: this.config.systemName,
                             status: "pending",
                         };
-                        await discoveredAssetRepo.create(asset);
+                        console.info(`YbScanner: creating sourceAsset: ${JSON.stringify(asset)}`);
+                        await sourceAssetRepo.create(asset);
                     }
                 } catch (e) {
                     this.config.logger.warn(`error creating DiscoveredAsset name=${fullName} error=${e}`);

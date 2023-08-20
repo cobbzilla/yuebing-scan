@@ -162,6 +162,7 @@ describe("scan test", async () => {
             runUploader: false,
         };
         test.scanner = new YbScanner(scanConfig);
+        logger.setLogLevel("info");
 
         // wait for scanner to discover asset
         let all = await test.sourceAssetRepo.findAll();

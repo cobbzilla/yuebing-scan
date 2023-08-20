@@ -44,7 +44,7 @@ export class YbAnalyzer {
             this.clock,
             this.config.logger,
             lockRepo,
-            asset,
+            SourceAssetTypeDef.id(asset),
             SourceAssetTypeDef,
             DOWNLOAD_LOCK_TIMEOUT,
         );
@@ -56,6 +56,7 @@ export class YbAnalyzer {
         lock.owner = this.config.systemName; // should be the same, but whatever
         lock.finished = this.clock.now();
         lock.status = "finished";
+        console.info(`transform: updating finished sourceAsset: ${JSON.stringify(lock)}`);
         lockRepo.update(lock).then((l) => {
             this.config.logger.info(`finished: ${JSON.stringify(l)}`);
         });

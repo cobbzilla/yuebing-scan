@@ -23,6 +23,7 @@ const claimLock = async <LOCK extends MobilettoLockType>(
         status: "started",
         started: startedAt,
     });
+    console.info(`claimLock: updating LOCK: ${JSON.stringify(lock)}`);
     const updated = await lockRepo.update(update);
     const verified = await lockRepo.safeFindById(targetId);
     if (verified?.owner === systemName && verified?.status === "started" && verified?.started === startedAt) {
@@ -35,16 +36,18 @@ const claimLock = async <LOCK extends MobilettoLockType>(
     }
 };
 
-export const acquireLock = async <LOCK extends MobilettoLockType, T extends MobilettoOrmObject>(
+export const acquireLock = async <LOCK extends MobilettoLockType>(
     systemName: string,
     clock: MobilettoClock,
     logger: MobilettoLogger,
     lockRepo: MobilettoOrmRepository<LOCK>,
-    target: T,
+    targetId: string,
     targetType: MobilettoOrmTypeDef,
     lockTimeout: number,
 ): Promise<LOCK | null> => {
-    const targetId = targetType.id(target);
+    if (!targetType.primary) {
+        throw new Error(`acquireLock: cannot lock on type that has no 'primary' field: ${targetType.typeName}`);
+    }
     const lock: LOCK | null = await lockRepo.safeFindById(targetId);
     if (!lock) {
         const toCreate: MobilettoLockType = {
@@ -52,7 +55,8 @@ export const acquireLock = async <LOCK extends MobilettoLockType, T extends Mobi
             status: "started",
             started: clock.now(),
         };
-        toCreate[targetType.typeName] = targetId;
+        toCreate[targetType.primary] = targetId;
+        console.info(`acquireLock: creating LOCK<${targetType.typeName}>: ${JSON.stringify(toCreate)}`);
         const created = await lockRepo.create(toCreate as LOCK);
         const found = await lockRepo.safeFindById(targetId);
         if (found?.owner === systemName) {

@@ -1,6 +1,6 @@
 {
   "name": "yuebing-scan",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
@@ -52,8 +52,8 @@
     "eslint-config-prettier": "^8.8.0",
     "mobiletto-base": "^2.1.1",
     "mobiletto-common": "^2.1.2",
-    "mobiletto-driver-local": "^2.0.13",
-    "mobiletto-orm": "^2.2.36",
+    "mobiletto-driver-local": "^2.0.15",
+    "mobiletto-orm": "^2.2.38",
     "mobiletto-orm-scan": "^1.0.13",
     "mobiletto-orm-scan-typedef": "^1.0.12",
     "mobiletto-orm-typedef": "^2.4.5",

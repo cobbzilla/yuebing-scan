@@ -77,8 +77,14 @@ export const analyzeAsset = async (
     await execAnalyze(assetDir, downloaded, profile, profileJob, processor.config.logger, sourceAsset);
     const existingAnalysis = await profileJobRepo.safeFindById(jobName);
     if (existingAnalysis) {
+        console.info(
+            `analyze: updating analysis profileJob: ${JSON.stringify(profileJob)} (previous=${JSON.stringify(
+                existingAnalysis,
+            )})`,
+        );
         await profileJobRepo.update(profileJob);
     } else {
+        console.info(`analyze: creating analysis profileJob: ${JSON.stringify(profileJob)}`);
         await profileJobRepo.create(profileJob);
     }
 };
@@ -135,6 +141,7 @@ export const analyzeSourceAsset = async (processor: YbAnalyzer, sourceAsset: Sou
                 profile: transformProfile.name,
                 asset: sourceAsset.name,
             };
+            console.info(`analyze: creating transform profileJob: ${JSON.stringify(profileJob)}`);
             await jobRepo.create(profileJob);
         }
     }

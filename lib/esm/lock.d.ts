@@ -7,4 +7,4 @@ export type MobilettoLockType = MobilettoOrmObject & {
     started?: number;
     finished?: number;
 };
-export declare const acquireLock: <LOCK extends MobilettoLockType, T extends MobilettoOrmObject>(systemName: string, clock: MobilettoClock, logger: MobilettoLogger, lockRepo: MobilettoOrmRepository<LOCK>, target: T, targetType: MobilettoOrmTypeDef, lockTimeout: number) => Promise<LOCK | null>;
+export declare const acquireLock: <LOCK extends MobilettoLockType>(systemName: string, clock: MobilettoClock, logger: MobilettoLogger, lockRepo: MobilettoOrmRepository<LOCK>, targetId: string, targetType: MobilettoOrmTypeDef, lockTimeout: number) => Promise<LOCK | null>;

@@ -36,11 +36,11 @@ devDependencies:
     specifier: ^2.1.2
     version: 2.1.2
   mobiletto-driver-local:
-    specifier: ^2.0.13
-    version: 2.0.13
+    specifier: ^2.0.15
+    version: 2.0.15
   mobiletto-orm:
-    specifier: ^2.2.36
-    version: 2.2.36
+    specifier: ^2.2.38
+    version: 2.2.38
   mobiletto-orm-scan:
     specifier: ^1.0.13
     version: 1.0.13
@@ -1184,8 +1184,8 @@ packages:
       consola: 3.2.3
     dev: true
 
-  /mobiletto-driver-local@2.0.13:
-    resolution: {integrity: sha512-m6zyXFOJIUJ+VuJb27D48wqhbyFphpKeP2ZL5JYCr5EdhNiR7QXaG8/izOBr6i6AYwV8XcMgUs9g3a9luDxk+g==}
+  /mobiletto-driver-local@2.0.15:
+    resolution: {integrity: sha512-cpJJj410M9hmGQMLVdMAH2IsTyKxzw2xfuO9xNYu/zPzRl61x85HroAOsyW3QmAVuZxmeH85GGueBubDXisyfw==}
     dev: true
 
   /mobiletto-orm-scan-typedef@1.0.12:
@@ -1203,8 +1203,8 @@ packages:
       uuid: 9.0.0
     dev: true
 
-  /mobiletto-orm@2.2.36:
-    resolution: {integrity: sha512-LOfZdyUge5vZeZtY4X34EoWElsdZlntMqPiYaj5Rlz25cpmf4vCNPDBKkLxqo2hAANDGaWIby3T3ogP9L5FnTA==}
+  /mobiletto-orm@2.2.38:
+    resolution: {integrity: sha512-YP0hKye9eEpZMxvM5VhTZxXxKtICj1G5U9xQc8NzlpoxQFV2um1ldYw8ww83UEXn4dbD6EMSowE09/pU5GnJsQ==}
     dev: true
 
   /mocha@10.2.0:

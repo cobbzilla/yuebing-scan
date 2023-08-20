@@ -69,7 +69,7 @@ export const transformAsset = async (
         xform.clock,
         xform.config.logger,
         jobRepo,
-        job,
+        ProfileJobTypeDef.id(job),
         ProfileJobTypeDef,
         JOB_TIMEOUT,
     );
@@ -131,6 +131,7 @@ export const transformAsset = async (
                 profile: profile.name,
                 destination: dest.name,
             };
+            console.info(`transform: creating uploadJob: ${JSON.stringify(uploadJob)}`);
             await uploadJobRepo.create(uploadJob);
         }
     }
@@ -148,6 +149,7 @@ export const transformAsset = async (
     lock.owner = xform.config.systemName; // should be the same, but whatever
     lock.finished = xform.clock.now();
     lock.status = "finished";
+    console.info(`transform: updating finished profileJob: ${JSON.stringify(lock)}`);
     jobRepo.update(lock).then((l) => {
         xform.config.logger.info(`finished: ${JSON.stringify(l)}`);
     });
