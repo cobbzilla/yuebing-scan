@@ -13,9 +13,6 @@ import { YbUploader } from "./ybUploader.js";
 
 export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 
-// export const LIBRARY_SCAN_TIMEOUT = 1000 * 60 * 60 * 24;
-// export const LIBRARY_SCAN_CHECK_INTERVAL = 1000 * 60;
-
 export class YbScanner {
     readonly config: YbScanConfig;
     readonly scanCheckInterval: number;

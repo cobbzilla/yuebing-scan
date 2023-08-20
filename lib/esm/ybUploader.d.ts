@@ -3,7 +3,7 @@ import { YbScanConfig } from "./config.js";
 export declare class YbUploader {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
-    readonly jobPollInterval: number;
+    readonly uploaderPollInterval: number;
     timeout: number | object | null;
     running: boolean;
     stopping: boolean;

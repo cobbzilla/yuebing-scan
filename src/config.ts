@@ -36,7 +36,8 @@ export type YbScanConfig = {
     assetDir: string;
     clock?: MobilettoClock;
     analyzerPollInterval?: number;
-    jobPollInterval?: number;
+    transformerPollInterval?: number;
+    uploaderPollInterval?: number;
     runAnalyzer?: boolean;
     runTransformer?: boolean;
     runUploader?: boolean;

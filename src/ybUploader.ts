@@ -10,7 +10,7 @@ const DEFAULT_UPLOAD_POLL_INTERVAL = 1000 * 60;
 export class YbUploader {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
-    readonly jobPollInterval: number;
+    readonly uploaderPollInterval: number;
 
     timeout: number | object | null = null;
     running: boolean = false;
@@ -19,7 +19,9 @@ export class YbUploader {
     constructor(config: YbScanConfig) {
         this.config = config;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
-        this.jobPollInterval = config.jobPollInterval ? config.jobPollInterval : DEFAULT_UPLOAD_POLL_INTERVAL;
+        this.uploaderPollInterval = config.uploaderPollInterval
+            ? config.uploaderPollInterval
+            : DEFAULT_UPLOAD_POLL_INTERVAL;
     }
     start() {
         if (!this.timeout) {
@@ -48,8 +50,8 @@ const ybUploadLoop = async (uploader: YbUploader) => {
                     processed = await uploadAsset(uploader, job, uploadJobRepo);
                 }
                 if (!processed) {
-                    const jitter = Math.floor(uploader.jobPollInterval * (Math.random() * 0.5 + 0.1));
-                    await sleep(uploader.jobPollInterval + jitter);
+                    const jitter = Math.floor(uploader.uploaderPollInterval * (Math.random() * 0.5 + 0.1));
+                    await sleep(uploader.uploaderPollInterval + jitter);
                 }
             } catch (e) {
                 uploader.config.logger.error(`ybUploadLoop: error=${e}`);

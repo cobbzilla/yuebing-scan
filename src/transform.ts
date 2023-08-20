@@ -142,7 +142,7 @@ export const transformAsset = async (
         const unfinished = jobs.filter((j) => j.status !== "finished");
         if (unfinished.length === 0) break;
         xform.config.logger.info(`waiting for ${unfinished.length} upload jobs to finish`);
-        await sleep(xform.jobPollInterval);
+        await sleep(xform.transformerPollInterval);
     }
 
     // update lock, mark finished

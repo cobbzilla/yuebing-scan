@@ -8,7 +8,7 @@ const DEFAULT_JOB_POLL_INTERVAL = 1000 * 60;
 export class YbTransformer {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
-    readonly jobPollInterval: number;
+    readonly transformerPollInterval: number;
 
     timeout: number | object | null = null;
     running: boolean = false;
@@ -17,7 +17,9 @@ export class YbTransformer {
     constructor(config: YbScanConfig) {
         this.config = config;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
-        this.jobPollInterval = config.jobPollInterval ? config.jobPollInterval : DEFAULT_JOB_POLL_INTERVAL;
+        this.transformerPollInterval = config.transformerPollInterval
+            ? config.transformerPollInterval
+            : DEFAULT_JOB_POLL_INTERVAL;
     }
     start() {
         if (!this.timeout) {
@@ -53,8 +55,8 @@ const ybTransformLoop = async (xform: YbTransformer) => {
                     }
                 }
                 if (!processed) {
-                    const jitter = Math.floor(xform.jobPollInterval * (Math.random() * 0.5 + 0.1));
-                    await sleep(xform.jobPollInterval + jitter);
+                    const jitter = Math.floor(xform.transformerPollInterval * (Math.random() * 0.5 + 0.1));
+                    await sleep(xform.transformerPollInterval + jitter);
                 }
             } catch (e) {
                 xform.config.logger.error(`ybTransformLoop: error=${e}`);
