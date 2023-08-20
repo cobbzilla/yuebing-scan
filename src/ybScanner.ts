@@ -9,6 +9,7 @@ import { acquireLock } from "./lock.js";
 import { ybScanLoop } from "./scan.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
 import { YbTransformer } from "./ybTransformer.js";
+import { YbUploader } from "./ybUploader.js";
 
 export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 
@@ -24,9 +25,15 @@ export class YbScanner {
     timeout: number | object | null = null;
     running: boolean = false;
     stopping: boolean = false;
+
     readonly scanner: MobilettoScanner;
-    readonly processor: YbAnalyzer;
+
+    readonly analyzer: YbAnalyzer;
+    readonly runAnalyzer: boolean;
     readonly transformer: YbTransformer;
+    readonly runTransformer: boolean;
+    readonly uploader: YbUploader;
+    readonly runUploader: boolean;
 
     constructor(config: YbScanConfig) {
         this.config = config;
@@ -34,8 +41,12 @@ export class YbScanner {
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
         this.initTime = this.clock.now();
         this.scanner = new MobilettoScanner(this.config.systemName, this.scanCheckInterval, this.clock);
-        this.processor = new YbAnalyzer(this.config);
+        this.analyzer = new YbAnalyzer(this.config);
+        this.runAnalyzer = this.config.runAnalyzer !== false;
         this.transformer = new YbTransformer(this.config);
+        this.runTransformer = this.config.runTransformer !== false;
+        this.uploader = new YbUploader(this.config);
+        this.runUploader = this.config.runUploader !== false;
         this.start();
     }
 
@@ -49,14 +60,16 @@ export class YbScanner {
                 this.scanner.start();
             }
         }
-        this.processor.start();
-        this.transformer.start();
+        if (this.runAnalyzer) this.analyzer.start();
+        if (this.runTransformer) this.transformer.start();
+        if (this.runUploader) this.uploader.start();
     }
 
     stop() {
         this.stopping = true;
         this.scanner.stop();
         this.transformer.stop();
+        this.uploader.stop();
     }
 
     async scanLibrary(lib: LibraryType, interval: number) {

@@ -10,7 +10,6 @@ import {
     SourceScanType,
     SourceType,
     DestinationType,
-    MediaOperationType,
     ProfileJobType,
     UploadJobType,
 } from "yuebing-model";
@@ -24,7 +23,6 @@ export type YbScanConfig = {
     localConfigRepo: () => MobilettoOrmRepository<LocalConfigType>;
     mediaRepo: () => MobilettoOrmRepository<MediaType>;
     mediaProfileRepo: () => MobilettoOrmRepository<MediaProfileType>;
-    mediaOperationRepo: () => MobilettoOrmRepository<MediaOperationType>;
     libraryRepo: () => MobilettoOrmRepository<LibraryType>;
     libraryScanRepo: () => MobilettoOrmRepository<LibraryScanType>;
     sourceScanRepo: () => MobilettoOrmRepository<SourceScanType>;
@@ -39,4 +37,7 @@ export type YbScanConfig = {
     clock?: MobilettoClock;
     analyzerPollInterval?: number;
     jobPollInterval?: number;
+    runAnalyzer?: boolean;
+    runTransformer?: boolean;
+    runUploader?: boolean;
 };

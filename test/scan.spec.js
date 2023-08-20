@@ -4,43 +4,63 @@ import { sleep } from "mobiletto-orm-scan-typedef";
 import { mobiletto, logger, registerDriver, shutdownMobiletto } from "mobiletto-base";
 import { repositoryFactory, rand } from "mobiletto-orm";
 import * as os from "os";
+import * as fs from "fs";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import { storageClient as localDriver } from "mobiletto-driver-local";
-import { YbScan, ASSET_SEP } from "../lib/esm/index.js";
 import {
     resolveConnectionConfig,
     DestinationTypeDef,
-    DiscoveredAssetTypeDef,
     LibraryScanTypeDef,
     LibraryTypeDef,
     LocalConfigTypeDef,
     MediaTypeDef,
     SourceScanTypeDef,
     SourceTypeDef,
+    SourceAssetTypeDef,
+    MediaProfileTypeDef,
+    ProfileJobTypeDef,
+    UploadJobTypeDef,
 } from "yuebing-model";
 
+import { YbScanner } from "../lib/esm/index.js";
+import { ASSET_SEP } from "yuebing-media";
+
 registerDriver("local", localDriver);
+
+const ensureDir = (dir) => {
+    const stat = fs.statSync(dir, { throwIfNoEntry: false });
+    if (!stat) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+};
 
 const test = {
     factory: null,
     tempDir: null,
     sourceRepo: null,
     destinationRepo: null,
-    mediaRepo: null,
     libraryRepo: null,
+    mediaRepo: null,
+    mediaProfileRepo: null,
+    mediaOperationRepo: null,
     localConfigRepo: null,
     libraryScanRepo: null,
     sourceScanRepo: null,
-    discoveredAssetRepo: null,
+    sourceAssetRepo: null,
+    profileJobRepo: null,
+    uploadJobRepo: null,
     source: null,
     destination: null,
     media: null,
     library: null,
     connectionConfig: null,
     sourceConnections: null,
+    downloadDir: null,
+    assetDir: null,
     localConfig: null,
     scanner: null,
 };
@@ -58,11 +78,16 @@ before(async () => {
         test.sourceRepo = test.factory.repository(SourceTypeDef);
         test.destinationRepo = test.factory.repository(DestinationTypeDef);
         test.mediaRepo = test.factory.repository(MediaTypeDef);
+        test.mediaProfileRepo = test.factory.repository(MediaProfileTypeDef);
         test.libraryRepo = test.factory.repository(LibraryTypeDef);
         test.localConfigRepo = test.factory.repository(LocalConfigTypeDef);
         test.libraryScanRepo = test.factory.repository(LibraryScanTypeDef);
         test.sourceScanRepo = test.factory.repository(SourceScanTypeDef);
-        test.discoveredAssetRepo = test.factory.repository(DiscoveredAssetTypeDef);
+        test.sourceAssetRepo = test.factory.repository(SourceAssetTypeDef);
+        test.profileJobRepo = test.factory.repository(ProfileJobTypeDef);
+        test.uploadJobRepo = test.factory.repository(UploadJobTypeDef);
+        test.downloadDir = ensureDir("/tmp/yb_test/download");
+        test.assetDir = ensureDir("/tmp/yb_test/asset");
         test.source = {
             name: "tempSource",
             type: "local",
@@ -121,22 +146,30 @@ describe("scan test", async () => {
             scanCheckInterval: 1000,
             logger,
             mediaRepo: () => test.mediaRepo,
-            discoveredAssetRepo: () => test.discoveredAssetRepo,
+            mediaProfileRepo: () => test.mediaProfileRepo,
             sourceRepo: () => test.sourceRepo,
             libraryRepo: () => test.libraryRepo,
             libraryScanRepo: () => test.libraryScanRepo,
             sourceScanRepo: () => test.sourceScanRepo,
+            sourceAssetRepo: () => test.sourceAssetRepo,
+            profileJobRepo: () => test.profileJobRepo,
+            uploadJobRepo: () => test.uploadJobRepo,
             sourceConnections: test.sourceConnections,
+            downloadDir: test.downloadDir,
+            assetDir: test.assetDir,
+            runAnalyzer: false,
+            runTransformer: false,
+            runUploader: false,
         };
-        test.scanner = new YbScan(scanConfig);
+        test.scanner = new YbScanner(scanConfig);
 
         // wait for scanner to discover asset
-        let all = await test.discoveredAssetRepo.findAll();
+        let all = await test.sourceAssetRepo.findAll();
         const start = Date.now();
         const discoverTimeout = 1000 * 15;
         while ((!all || all.length === 0) && Date.now() - start < discoverTimeout) {
             await sleep(5000);
-            all = await test.discoveredAssetRepo.findAll();
+            all = await test.sourceAssetRepo.findAll();
         }
         expect(all.length).eq(1);
         expect(all[0].name).eq(test.source.name + ASSET_SEP + "sample.txt");

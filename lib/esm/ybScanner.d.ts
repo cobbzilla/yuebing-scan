@@ -4,6 +4,7 @@ import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { YbScanConfig } from "./config.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
 import { YbTransformer } from "./ybTransformer.js";
+import { YbUploader } from "./ybUploader.js";
 export declare const DEFAULT_SCAN_CHECK_INTERVAL: number;
 export declare class YbScanner {
     readonly config: YbScanConfig;
@@ -14,8 +15,12 @@ export declare class YbScanner {
     running: boolean;
     stopping: boolean;
     readonly scanner: MobilettoScanner;
-    readonly processor: YbAnalyzer;
+    readonly analyzer: YbAnalyzer;
+    readonly runAnalyzer: boolean;
     readonly transformer: YbTransformer;
+    readonly runTransformer: boolean;
+    readonly uploader: YbUploader;
+    readonly runUploader: boolean;
     constructor(config: YbScanConfig);
     start(): void;
     stop(): void;

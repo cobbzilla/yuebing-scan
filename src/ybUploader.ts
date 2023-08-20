@@ -3,10 +3,11 @@ import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef
 import { connectVolume, UploadJobType } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
 import { YbScanConfig } from "./config.js";
+import { MobilettoOrmRepository } from "mobiletto-orm";
 
 const DEFAULT_UPLOAD_POLL_INTERVAL = 1000 * 60;
 
-class YbUploader {
+export class YbUploader {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
     readonly jobPollInterval: number;
@@ -44,7 +45,7 @@ const ybUploadLoop = async (uploader: YbUploader) => {
                 const job = await uploadJobRepo.safeFindFirstBy("status", "pending");
                 if (uploader.stopping) break;
                 if (job) {
-                    processed = await uploadAsset(uploader, job);
+                    processed = await uploadAsset(uploader, job, uploadJobRepo);
                 }
                 if (!processed) {
                     const jitter = Math.floor(uploader.jobPollInterval * (Math.random() * 0.5 + 0.1));
@@ -64,12 +65,25 @@ const ybUploadLoop = async (uploader: YbUploader) => {
     }
 };
 
-const uploadAsset = async (uploader: YbUploader, job: UploadJobType): Promise<boolean> => {
+const uploadAsset = async (
+    uploader: YbUploader,
+    job: UploadJobType,
+    uploadJobRepo: MobilettoOrmRepository<UploadJobType>,
+): Promise<boolean> => {
     const destRepo = uploader.config.destinationRepo();
     const dest = await destRepo.findById(job.destination);
     const conn = await connectVolume(dest);
     const destPath = destinationPath(job.sourceAsset, job.media, job.profile, job.localPath);
     const reader = fs.createReadStream(job.localPath);
     await conn.write(destPath, reader);
+
+    // update lock, mark finished
+    job.owner = uploader.config.systemName; // should be the same, but whatever
+    job.finished = uploader.clock.now();
+    job.status = "finished";
+    uploadJobRepo.update(job).then((l) => {
+        uploader.config.logger.info(`finished: ${JSON.stringify(l)}`);
+    });
+
     return true;
 };

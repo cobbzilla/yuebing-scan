@@ -1,6 +1,6 @@
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoOrmRepository } from "mobiletto-orm";
-import { SourceAssetType, LibraryScanType, LibraryType, LocalConfigType, MediaType, MediaProfileType, SourceScanType, SourceType, DestinationType, MediaOperationType, ProfileJobType, UploadJobType } from "yuebing-model";
+import { SourceAssetType, LibraryScanType, LibraryType, LocalConfigType, MediaType, MediaProfileType, SourceScanType, SourceType, DestinationType, ProfileJobType, UploadJobType } from "yuebing-model";
 import { MobilettoConnection } from "mobiletto-base";
 import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 export type YbScanConfig = {
@@ -10,7 +10,6 @@ export type YbScanConfig = {
     localConfigRepo: () => MobilettoOrmRepository<LocalConfigType>;
     mediaRepo: () => MobilettoOrmRepository<MediaType>;
     mediaProfileRepo: () => MobilettoOrmRepository<MediaProfileType>;
-    mediaOperationRepo: () => MobilettoOrmRepository<MediaOperationType>;
     libraryRepo: () => MobilettoOrmRepository<LibraryType>;
     libraryScanRepo: () => MobilettoOrmRepository<LibraryScanType>;
     sourceScanRepo: () => MobilettoOrmRepository<SourceScanType>;
@@ -25,4 +24,7 @@ export type YbScanConfig = {
     clock?: MobilettoClock;
     analyzerPollInterval?: number;
     jobPollInterval?: number;
+    runAnalyzer?: boolean;
+    runTransformer?: boolean;
+    runUploader?: boolean;
 };

@@ -1,13 +1,13 @@
+import * as fs from "fs";
 import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } from "yuebing-model";
 import { MobilettoLogger } from "mobiletto-common";
-import { prepareOutputDir, runExternalCommand } from "./util";
 import { applyProfile, ApplyProfileResponse, loadProfile, ParsedProfile } from "yuebing-media";
-import { acquireLock } from "./lock";
-import { downloadSourceAsset } from "./download";
-import fs from "fs";
-import { YbTransformer } from "./ybTransformer";
 import { basename } from "mobiletto-orm-typedef";
 import { sleep } from "mobiletto-orm-scan-typedef";
+import { prepareOutputDir, runExternalCommand } from "./util.js";
+import { acquireLock } from "./lock.js";
+import { downloadSourceAsset } from "./download.js";
+import { YbTransformer } from "./ybTransformer.js";
 
 const JOB_TIMEOUT = 1000 * 60 * 60 * 24;
 

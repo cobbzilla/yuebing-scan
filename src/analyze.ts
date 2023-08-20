@@ -1,10 +1,10 @@
-import { YbAnalyzer } from "./ybAnalyzer";
+import { MobilettoLogger } from "mobiletto-common";
+import { sleep } from "mobiletto-orm-scan-typedef";
 import { MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
 import { applyProfile, ApplyProfileResponse, fileExtWithoutDot, loadProfile, ParsedProfile } from "yuebing-media";
 import { profileJobName, prepareOutputDir, runExternalCommand } from "./util.js";
-import { MobilettoLogger } from "mobiletto-common";
-import { downloadSourceAsset } from "./download";
-import { sleep } from "mobiletto-orm-scan-typedef";
+import { downloadSourceAsset } from "./download.js";
+import { YbAnalyzer } from "./ybAnalyzer.js";
 
 const execAnalyze = async (
     assetDir: string,
