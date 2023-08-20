@@ -68,13 +68,13 @@ export const acquireLock = async <LOCK extends MobilettoLockType>(
             return null;
         }
     } else if (lock.finished) {
-        logger.warn(`acquireLock warn=recently_scanned finished=${lock.finished}`);
+        logger.debug(`acquireLock warn=recently_finished finished=${lock.finished}`);
         return null;
     } else if (lock.started) {
         if (clock.now() - lock.started > lockTimeout) {
             return await claimLock(lock, systemName, clock, lockRepo, targetId, logger);
         } else {
-            logger.warn(`acquireLock warn=recently_scanning started=${lock.started}`);
+            logger.debug(`acquireLock warn=recently_started started=${lock.started}`);
             return null;
         }
     } else {

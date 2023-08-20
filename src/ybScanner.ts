@@ -82,7 +82,7 @@ export class YbScanner {
                 interval,
             );
             if (!lock) {
-                this.config.logger.error(
+                this.config.logger.debug(
                     `scanLibrary system=${this.config.systemName} lib=${lib.name} error=acquiring_lock`,
                 );
                 return;
