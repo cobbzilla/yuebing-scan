@@ -3,7 +3,7 @@ import * as os from "os";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { rand, repositoryFactory } from "mobiletto-orm";
-import { logger, mobiletto, registerDriver } from "mobiletto-base";
+import { logger, mobiletto, registerDriver, shutdownMobiletto } from "mobiletto-base";
 import { storageClient as localDriver } from "mobiletto-driver-local";
 
 import {
@@ -248,4 +248,9 @@ export const waitForNonemptyQuery = async (query, predicate = (x) => true, timeo
         }
     }
     return null;
+};
+
+export const cleanupTest = (test, done) => {
+    if (test.scanner) test.scanner.stop();
+    shutdownMobiletto().finally(done);
 };

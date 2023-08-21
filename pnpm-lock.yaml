@@ -39,17 +39,17 @@ devDependencies:
     specifier: ^2.0.15
     version: 2.0.15
   mobiletto-orm:
-    specifier: ^2.2.42
-    version: 2.2.42
+    specifier: ^2.2.43
+    version: 2.2.43
   mobiletto-orm-scan:
-    specifier: ^1.0.15
-    version: 1.0.15
+    specifier: ^1.0.16
+    version: 1.0.16
   mobiletto-orm-scan-typedef:
     specifier: ^1.0.12
     version: 1.0.12
   mobiletto-orm-typedef:
-    specifier: ^2.4.7
-    version: 2.4.7
+    specifier: ^2.4.8
+    version: 2.4.8
   mocha:
     specifier: ^10.2.0
     version: 10.2.0
@@ -63,17 +63,17 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   yuebing-media:
-    specifier: ^1.0.42
-    version: 1.0.42
+    specifier: ^1.0.44
+    version: 1.0.44
   yuebing-media-video:
-    specifier: ^1.0.34
-    version: 1.0.34
+    specifier: ^1.0.36
+    version: 1.0.36
   yuebing-messages:
     specifier: ^2.1.7
     version: 2.1.7
   yuebing-model:
-    specifier: ^2.7.16
-    version: 2.7.16
+    specifier: ^2.7.18
+    version: 2.7.18
 
 packages:
 
@@ -460,8 +460,8 @@ packages:
     resolution: {integrity: sha512-qhAVI1+Av2X7qelOfAIYwXONood6XlZE/fXaBSmW/T5SzLAmCgzi+eiWE7fUvbHaeNBQH13UftjpXxsfLkMpgw==}
     dev: true
 
-  /bullmq@4.7.4:
-    resolution: {integrity: sha512-O5KQbkO29y0NxVVh10RHsLG2LGFic9Izw02yGIuoJLcTDgV9KDzVHhT0bzaqohIpq8YflwcXjokLldloycddSA==}
+  /bullmq@4.8.0:
+    resolution: {integrity: sha512-M5NPxrzHQ53yeRSH3j52dOu0U6Lssdhumet9CJ9LzTh2GNbhad9VPQunaariEmPmK0zCFF2uf08PVWtRbXnQkQ==}
     dependencies:
       cron-parser: 4.9.0
       glob: 8.1.0
@@ -1167,7 +1167,7 @@ packages:
   /mobiletto-base@2.1.1:
     resolution: {integrity: sha512-Q0mjSRfULuP1edMAJD/BWXQEj4LcIouXhA6cbASaHAxYS87M8VluJM/7peTnz+4cSxELXApRnR7oM8J+eT8voA==}
     dependencies:
-      bullmq: 4.7.4
+      bullmq: 4.8.0
       ioredis: 5.3.2
       lru-cache: 10.0.1
       mobiletto-common: 2.1.2
@@ -1192,19 +1192,19 @@ packages:
     resolution: {integrity: sha512-r2KVrR9EYAxKh4gcUkgIhiTgmgC10Fcah860IoaUsTGNCdOIpjpmgtzMyL/pjSwdGkn47OBXX7NE1/E9d0sbmA==}
     dev: true
 
-  /mobiletto-orm-scan@1.0.15:
-    resolution: {integrity: sha512-tr/8NWI3xFTvqASz291+awqOVFIkJ25KfveUGnZa3Xex/eCEqCZ60dhHMXHWQeuTgNRBGmvAWuIk+IPX2+nVUg==}
+  /mobiletto-orm-scan@1.0.16:
+    resolution: {integrity: sha512-ZPYXtpmTv0RNte1kd2mfRaLY2OOpZ+O3QZC6bLd/nthlTah5zwYTnunX3zArrNT2p5wjqEaMaVkBb4Mg8C433A==}
     dev: true
 
-  /mobiletto-orm-typedef@2.4.7:
-    resolution: {integrity: sha512-UCleqDuSgoOdCNBqSSQkj0rQ5tu9nRqrmdgMxtkx9gfsXT41SlTCNsqwgFNay6pZQjuzqpc+0XqHnJfbdVQYFw==}
+  /mobiletto-orm-typedef@2.4.8:
+    resolution: {integrity: sha512-UNS1RiIgJ8mmvMWAo8QGCFh7TOxGGT4EvxB/vmb3o2qmJPpvb/nhBQVQOF3nGQPAhXw9F5SyJCLUysigjSUddg==}
     dependencies:
       shasum: 1.0.2
       uuid: 9.0.0
     dev: true
 
-  /mobiletto-orm@2.2.42:
-    resolution: {integrity: sha512-N4D66ZwMbwFa1novbhppiPab8NaqKKYYyiHlZV3jVIynXKk7BtssB9EWTTHEtOup+kvB65KDDg3GMwsDQuPeJw==}
+  /mobiletto-orm@2.2.43:
+    resolution: {integrity: sha512-n+6teNUdXZ15ve/uQDqupKxwxw1GWXu4X71aILgLpLYVN3jXdDvW+an9MGL7YKEbmvMQj7e5+hErJ1hh8U4v0A==}
     dev: true
 
   /mocha@10.2.0:
@@ -1678,12 +1678,12 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /yuebing-media-video@1.0.34:
-    resolution: {integrity: sha512-WiURQoa0qBnAWsMkXVsNKNHJFnBO5LjgHYJXOX4aiBCxIwi7KqN+naPhvYzu7OzVLGFrxR9jAsycOY8/TRDjGA==}
+  /yuebing-media-video@1.0.36:
+    resolution: {integrity: sha512-i9koKcotK80s5cXeDJwZrELxbW0dxpdjfKWOpq7PJX39weD4sN3euWDbO7wPoLSfl53lJl8YbIImnh92cEfjlw==}
     dev: true
 
-  /yuebing-media@1.0.42:
-    resolution: {integrity: sha512-HuRVgbIeqkESk4z/El0NWIsc9dI96hkVWeGqKVIYk126pxeK5DLDECeapmuMe79Us38DC+cl1w7nRieUcKkQNQ==}
+  /yuebing-media@1.0.44:
+    resolution: {integrity: sha512-4/JJpY6ev1wx1ZViLA0Fr4BEuaFoa1Nr+NmU3saDe1OMgvsn+sdFb6l+TTcyqZVOazXLEWMP2oRatVkARlFb9A==}
     dev: true
 
   /yuebing-messages@2.1.7:
@@ -1692,6 +1692,6 @@ packages:
       hokey-runtime: 1.0.4
     dev: true
 
-  /yuebing-model@2.7.16:
-    resolution: {integrity: sha512-E8umLtt01/p6W1n0lgCZ9Z+UlTPNwswGYZ+5r/wQ+/xIEMiMbB844IDsVWYdBCcY4fZReJhXLTI5TweBgEe08w==}
+  /yuebing-model@2.7.18:
+    resolution: {integrity: sha512-wHL+qAFKp8u/wMHkZZYmKlJVwzaHwvkvpCygEkVWiBinODRNmb0OvR2doAEnl8qKisuB8mlHfMoLWttxWFFy9w==}
     dev: true

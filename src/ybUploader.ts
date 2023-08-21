@@ -1,9 +1,10 @@
 import * as fs from "fs";
+import { MobilettoOrmRepository } from "mobiletto-orm";
 import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
-import { connectVolume, UploadJobType } from "yuebing-model";
+import { connectVolume, UploadJobType, UploadJobTypeDef } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
 import { YbScanConfig } from "./config.js";
-import { MobilettoOrmRepository } from "mobiletto-orm";
+import { acquireLock } from "./lock.js";
 
 const DEFAULT_UPLOAD_POLL_INTERVAL = 1000 * 60;
 
@@ -38,6 +39,16 @@ export class YbUploader {
     }
 }
 
+const MIN_UPLOAD_TIMEOUT = 1000 * 60 * 2; // 2 minutes
+const MAX_UPLOAD_TIMEOUT = 1000 * 60 * 60 * 2; // 2 hours
+
+const MIN_BANDWIDTH = 500 * 1000; // ~500Kbps
+
+const uploadTimeout = (size: number): number => {
+    const millis = 1000 * Math.floor(size / MIN_BANDWIDTH);
+    return Math.min(Math.max(millis, MIN_UPLOAD_TIMEOUT), MAX_UPLOAD_TIMEOUT);
+};
+
 const ybUploadLoop = async (uploader: YbUploader) => {
     try {
         while (!uploader.stopping) {
@@ -47,7 +58,19 @@ const ybUploadLoop = async (uploader: YbUploader) => {
                 const job = await uploadJobRepo.safeFindFirstBy("status", "pending");
                 if (uploader.stopping) break;
                 if (job) {
-                    processed = await uploadAsset(uploader, job, uploadJobRepo);
+                    // set lock timeout based on file size
+                    const lock = await acquireLock(
+                        uploader.config.systemName,
+                        uploader.clock,
+                        uploader.config.logger,
+                        uploadJobRepo,
+                        UploadJobTypeDef.id(job),
+                        UploadJobTypeDef,
+                        uploadTimeout(job.size),
+                    );
+                    if (lock) {
+                        processed = await uploadAsset(uploader, lock, uploadJobRepo);
+                    }
                 }
                 if (!processed) {
                     const jitter = Math.floor(uploader.uploaderPollInterval * (Math.random() * 0.5 + 0.1));
@@ -84,9 +107,7 @@ const uploadAsset = async (
     job.status = "finished";
     job.finished = uploader.clock.now();
     console.info(`YbUploader: updating finished uploadJob: ${JSON.stringify(job)}`);
-    uploadJobRepo.update(job).then((l) => {
-        uploader.config.logger.info(`finished: ${JSON.stringify(l)}`);
-    });
-
+    job = await uploadJobRepo.update(job);
+    uploader.config.logger.info(`finished: ${JSON.stringify(job)}`);
     return true;
 };

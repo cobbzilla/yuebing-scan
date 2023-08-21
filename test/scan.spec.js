@@ -1,7 +1,6 @@
 import { before, after, describe, it } from "mocha";
 import { expect } from "chai";
-import { shutdownMobiletto } from "mobiletto-base";
-import { newTest, waitForNonemptyQuery } from "./setup.js";
+import { cleanupTest, newTest, waitForNonemptyQuery } from "./setup.js";
 
 let test;
 
@@ -22,7 +21,4 @@ describe("scan test", async () => {
     });
 });
 
-after((done) => {
-    if (test.scanner) test.scanner.stop();
-    shutdownMobiletto().finally(done);
-});
+after((done) => cleanupTest(test, done));

@@ -127,12 +127,15 @@ export const transformAsset = async (
     const uploadJobRepo = xform.config.uploadJobRepo();
     for (const dest of destinations) {
         for (const path of uploadSet) {
+            const localPath = `${outDir}/${path}`;
+            const stat = fs.statSync(localPath);
             const uploadJob: UploadJobType = {
-                localPath: `${outDir}/${path}`,
+                localPath,
                 asset: job.asset,
                 media: profile.media,
                 profile: profile.name,
                 destination: dest.name,
+                size: stat.size,
             };
             console.info(`transform: creating uploadJob: ${JSON.stringify(uploadJob)}`);
             await uploadJobRepo.create(uploadJob);
@@ -140,8 +143,8 @@ export const transformAsset = async (
     }
 
     // wait for uploads to finish
-    for (;;) {
-        const jobs = (await uploadJobRepo.safeFindBy("sourceAsset", job.asset)) as UploadJobType[];
+    while (!xform.stopping) {
+        const jobs = (await uploadJobRepo.safeFindBy("asset", job.asset)) as UploadJobType[];
         if (jobs.length === 0) {
             xform.config.logger.info(`transform: error finding upload jobs for asset: ${job.asset}`);
             return false;
@@ -151,6 +154,7 @@ export const transformAsset = async (
         xform.config.logger.info(`waiting for ${unfinished.length} upload jobs to finish`);
         await sleep(xform.transformerPollInterval);
     }
+    if (xform.stopping) return false;
 
     // update lock, mark finished
     lock.owner = xform.config.systemName; // should be the same, but whatever
