@@ -11,6 +11,7 @@ const DEFAULT_UPLOAD_POLL_INTERVAL = 1000 * 60;
 export class YbUploader {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
+    readonly removeLocalFiles: boolean;
     readonly uploaderPollInterval: number;
 
     timeout: number | object | null = null;
@@ -20,6 +21,7 @@ export class YbUploader {
     constructor(config: YbScanConfig) {
         this.config = config;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
+        this.removeLocalFiles = config.removeLocalFiles !== false;
         this.uploaderPollInterval = config.uploaderPollInterval
             ? config.uploaderPollInterval
             : DEFAULT_UPLOAD_POLL_INTERVAL;
@@ -106,8 +108,16 @@ const uploadAsset = async (
     job.owner = uploader.config.systemName; // should be the same, but whatever
     job.status = "finished";
     job.finished = uploader.clock.now();
-    console.info(`YbUploader: updating finished uploadJob: ${JSON.stringify(job)}`);
     job = await uploadJobRepo.update(job);
     uploader.config.logger.info(`finished: ${JSON.stringify(job)}`);
+
+    if (uploader.removeLocalFiles) {
+        try {
+            // remove local file, it's been uploaded
+            fs.rmSync(job.localPath, { force: true });
+        } catch (e) {
+            uploader.config.logger.warn(`error removing job.localPath=${job.localPath} error=${e}`);
+        }
+    }
     return true;
 };

@@ -8,6 +8,7 @@ const DEFAULT_JOB_POLL_INTERVAL = 1000 * 60;
 export class YbTransformer {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
+    readonly removeLocalFiles: boolean;
     readonly transformerPollInterval: number;
 
     timeout: number | object | null = null;
@@ -17,6 +18,7 @@ export class YbTransformer {
     constructor(config: YbScanConfig) {
         this.config = config;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
+        this.removeLocalFiles = config.removeLocalFiles !== false;
         this.transformerPollInterval = config.transformerPollInterval
             ? config.transformerPollInterval
             : DEFAULT_JOB_POLL_INTERVAL;

@@ -28,4 +28,5 @@ export type YbScanConfig = {
     runAnalyzer?: boolean;
     runTransformer?: boolean;
     runUploader?: boolean;
+    removeLocalFiles?: boolean;
 };

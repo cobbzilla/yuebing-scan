@@ -9,6 +9,7 @@ let test;
 before(async () => {
     test = await newTest(async (test) => {
         await setupTransformObjects(test);
+        test.scanConfig.removeLocalFiles = false;
     });
 });
 
@@ -22,7 +23,6 @@ describe("transform test", async () => {
         const finishedScans = await waitForNonemptyQuery(
             () => test.sourceAssetRepo.findAll(),
             (a) => a.status === "finished",
-            1000 * 60,
         );
         expect(finishedScans[0].name).eq(test.assetName);
 

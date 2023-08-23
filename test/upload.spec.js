@@ -12,6 +12,7 @@ before(async () => {
     test = await newTest(async (test) => {
         await setupTransformObjects(test);
         test.scanConfig.runUploader = true;
+        test.scanConfig.removeLocalFiles = false;
     });
 });
 
@@ -42,7 +43,6 @@ describe("upload test", async () => {
                     predicate: (a) => a.profile === TRANSFORM_PROFILE_NAME,
                 }),
             (a) => a.status === "finished",
-            30000000,
         );
         expect(finishedTransforms[0].asset).eq(test.assetName);
 

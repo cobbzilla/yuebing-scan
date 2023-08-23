@@ -213,6 +213,7 @@ export const newTest = async (adjustTest) => {
         runAnalyzer: false,
         runTransformer: false,
         runUploader: false,
+        removeLocalFiles: true,
         scanPollInterval: 1000,
         analyzerPollInterval: 1000,
         transformerPollInterval: 1000,

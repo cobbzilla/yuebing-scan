@@ -164,5 +164,15 @@ export const transformAsset = async (
     jobRepo.update(lock).then((l) => {
         xform.config.logger.info(`finished: ${JSON.stringify(l)}`);
     });
+
+    if (xform.removeLocalFiles) {
+        try {
+            // remove outDir, it should be mostly/entirely empty because
+            // each uploaded asset was removed when the upload completed
+            fs.rmSync(outDir, { recursive: true, force: true });
+        } catch (e) {
+            xform.config.logger.warn(`error removing outDir=${outDir} error=${e}`);
+        }
+    }
     return true;
 };
