@@ -3,6 +3,7 @@ import { MobilettoOrmRepository } from "mobiletto-orm";
 import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { connectVolume, UploadJobType, UploadJobTypeDef } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
+import { transferTimeout } from "./util.js";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
 
@@ -41,16 +42,6 @@ export class YbUploader {
     }
 }
 
-const MIN_UPLOAD_TIMEOUT = 1000 * 60 * 2; // 2 minutes
-const MAX_UPLOAD_TIMEOUT = 1000 * 60 * 60 * 2; // 2 hours
-
-const MIN_BANDWIDTH = 500 * 1000; // ~500Kbps
-
-const uploadTimeout = (size: number): number => {
-    const millis = 1000 * Math.floor(size / MIN_BANDWIDTH);
-    return Math.min(Math.max(millis, MIN_UPLOAD_TIMEOUT), MAX_UPLOAD_TIMEOUT);
-};
-
 const ybUploadLoop = async (uploader: YbUploader) => {
     try {
         while (!uploader.stopping) {
@@ -68,7 +59,7 @@ const ybUploadLoop = async (uploader: YbUploader) => {
                         uploadJobRepo,
                         UploadJobTypeDef.id(job),
                         UploadJobTypeDef,
-                        uploadTimeout(job.size),
+                        transferTimeout(job.size),
                     );
                     if (lock) {
                         processed = await uploadAsset(uploader, lock, uploadJobRepo);

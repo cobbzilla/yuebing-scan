@@ -8,3 +8,4 @@ export type SpawnResult = {
     exitCode: number | null;
 };
 export declare const runExternalCommand: (command: string, args: string[]) => Promise<SpawnResult>;
+export declare const transferTimeout: (size: number, bandwidth?: number, minTimeout?: number, maxTimeout?: number) => number;

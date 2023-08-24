@@ -13,8 +13,6 @@ import {
     LibraryTypeDef,
     LocalConfigTypeDef,
     MediaTypeDef,
-    MediaPropertyTypeDef,
-    MediaOperationTypeDef,
     MediaProfileTypeDef,
     ProfileJobTypeDef,
     SourceAssetTypeDef,
@@ -47,8 +45,18 @@ const countWordsInFile = async (filePath) => {
 export const OP_WORDCOUNT = "wordCount";
 export const OP_UPCASE = "uppercase";
 
+export const TEST_OPS = {
+    [OP_WORDCOUNT]: {
+        name: OP_WORDCOUNT,
+        media: "textMedia",
+        analysis: true,
+        func: true,
+        minFileSize: 0,
+    },
+};
+
 const mediaDriver = {
-    applyProfile: async (downloaded, profile, props, outDir) => {
+    applyProfile: async (downloaded, profile, outDir) => {
         if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
         if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
         if (!profile.operation) throw new Error(`applyProfile: no operation defined for profile: ${profile.name}`);
@@ -62,6 +70,7 @@ const mediaDriver = {
             throw new Error(`invalid operation: ${profile.operation}`);
         }
     },
+    operations: TEST_OPS,
     operationConfigType: () => undefined,
 };
 
@@ -85,8 +94,6 @@ export const newTest = async (adjustTest) => {
         libraryRepo: null,
         mediaRepo: null,
         mediaProfileRepo: null,
-        mediaOperationRepo: null,
-        mediaPropertyRepo: null,
         localConfigRepo: null,
         libraryScanRepo: null,
         sourceScanRepo: null,
@@ -116,8 +123,6 @@ export const newTest = async (adjustTest) => {
     test.sourceRepo = test.factory.repository(SourceTypeDef);
     test.destinationRepo = test.factory.repository(DestinationTypeDef);
     test.mediaRepo = test.factory.repository(MediaTypeDef);
-    test.mediaOperationRepo = test.factory.repository(MediaOperationTypeDef);
-    test.mediaPropertyRepo = test.factory.repository(MediaPropertyTypeDef);
     test.mediaProfileRepo = test.factory.repository(MediaProfileTypeDef);
     test.libraryRepo = test.factory.repository(LibraryTypeDef);
     test.localConfigRepo = test.factory.repository(LocalConfigTypeDef);
@@ -148,15 +153,6 @@ export const newTest = async (adjustTest) => {
         ext: ["txt"],
     };
     test.media = await test.mediaRepo.create(test.media);
-
-    test.mediaOperation = {
-        name: OP_WORDCOUNT,
-        media: "textMedia",
-        analysis: true,
-        func: true,
-        minFileSize: 0,
-    };
-    test.mediaOperation = await test.mediaOperationRepo.create(test.mediaOperation);
 
     test.mediaProfile = {
         name: ANALYSIS_PROFILE_NAME,

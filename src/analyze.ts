@@ -1,10 +1,18 @@
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
-import { applyProfile, ApplyProfileResponse, fileExtWithoutDot, loadProfile, ParsedProfile } from "yuebing-media";
+import {
+    applyProfile,
+    ApplyProfileResponse,
+    assetPath,
+    fileExtWithoutDot,
+    loadProfile,
+    ParsedProfile,
+} from "yuebing-media";
 import { profileJobName, prepareOutputDir, runExternalCommand } from "./util.js";
 import { downloadSourceAsset } from "./download.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
+import { MobilettoConnection } from "mobiletto-base";
 
 const execAnalyze = async (
     assetDir: string,
@@ -13,6 +21,7 @@ const execAnalyze = async (
     profileJob: ProfileJobType,
     logger: MobilettoLogger,
     sourceAsset: SourceAssetType,
+    conn: MobilettoConnection,
     clock: MobilettoClock,
 ): Promise<ProfileJobType | null> => {
     if (!profile.operationObject) {
@@ -24,7 +33,14 @@ const execAnalyze = async (
         return null;
     }
     const outDir = prepareOutputDir(assetDir, downloaded, profile);
-    const response: ApplyProfileResponse = await applyProfile(downloaded, profile.media, profile.name, outDir);
+    const response: ApplyProfileResponse = await applyProfile(
+        downloaded,
+        profile.media,
+        profile.name,
+        outDir,
+        assetPath(sourceAsset.name),
+        conn,
+    );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
         if (response.analysis) {
@@ -65,6 +81,7 @@ export const analyzeAsset = async (
     sourceAsset: SourceAssetType,
     downloaded: string,
     profile: ParsedProfile,
+    conn: MobilettoConnection,
 ) => {
     const assetDir = analyzer.config.assetDir;
     if (!profile.operationObject || !assetDir) return null; // should never happen
@@ -80,7 +97,16 @@ export const analyzeAsset = async (
         status: "started",
         started: analyzer.clock.now(),
     };
-    await execAnalyze(assetDir, downloaded, profile, profileJob, analyzer.config.logger, sourceAsset, analyzer.clock);
+    await execAnalyze(
+        assetDir,
+        downloaded,
+        profile,
+        profileJob,
+        analyzer.config.logger,
+        sourceAsset,
+        conn,
+        analyzer.clock,
+    );
     const existingAnalysis = await profileJobRepo.safeFindById(jobName);
     if (existingAnalysis) {
         console.info(
@@ -96,13 +122,14 @@ export const analyzeAsset = async (
 };
 
 export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: SourceAssetType) => {
-    const downloaded = await downloadSourceAsset(
+    const downloadResult = await downloadSourceAsset(
         analyzer.config.downloadDir,
         sourceAsset,
         analyzer.config.sourceRepo(),
         analyzer.clock,
     );
-    if (!downloaded) return false; // source asset had no name, should never happen
+    if (!downloadResult) return false; // should not happen
+    const downloaded = downloadResult.outfile;
 
     // which media types are interested in this file?
     const mediaRepo = analyzer.config.mediaRepo();
@@ -134,7 +161,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
     }
 
     for (const analyzeProfile of analysisProfiles) {
-        await analyzeAsset(analyzer, sourceAsset, downloaded, analyzeProfile);
+        await analyzeAsset(analyzer, sourceAsset, downloaded, analyzeProfile, downloadResult.conn);
     }
 
     const jobRepo = analyzer.config.profileJobRepo();

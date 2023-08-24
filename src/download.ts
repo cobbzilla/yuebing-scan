@@ -1,18 +1,23 @@
+import fs from "fs";
 import { MobilettoOrmRepository } from "mobiletto-orm";
 import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
+import { sha } from "mobiletto-orm-typedef";
+import { MobilettoConnection } from "mobiletto-base";
 import { connectVolume, SourceAssetType, SourceType } from "yuebing-model";
 import { assetPath, assetSource, fileExtWithDot } from "yuebing-media";
-import { sha } from "mobiletto-orm-typedef";
-import fs from "fs";
+import { transferTimeout } from "./util.js";
 
-const DOWNLOAD_TIMEOUT = 1000 * 60;
+export type DownloadAssetResult = {
+    outfile: string;
+    conn: MobilettoConnection;
+};
 
 export const downloadSourceAsset = async (
     downloadDir: string,
     sourceAsset: SourceAssetType | string,
     sourceRepo: MobilettoOrmRepository<SourceType>,
     clock: MobilettoClock,
-): Promise<string | null> => {
+): Promise<DownloadAssetResult | null> => {
     const assetName = typeof sourceAsset === "string" ? assetPath(sourceAsset) : sourceAsset.name;
     if (!assetName) return null; // should never happen
 
@@ -25,15 +30,20 @@ export const downloadSourceAsset = async (
     const source = await sourceRepo.findById(sourceName);
     const conn = await connectVolume(source);
     const meta = await conn.metadata(srcPath);
+    if (!meta.size) {
+        throw new Error(`downloadSourceAsset(${sourceAsset}): meta.size was not defined`);
+    }
     if (outfileStat) {
+        const timeout = transferTimeout(meta.size);
+
         // wait for file to finish downloading, or to timeout
-        while (outfileStat && outfileStat.size !== meta.size && clock.now() - outfileStat.mtimeMs < DOWNLOAD_TIMEOUT) {
+        while (outfileStat && outfileStat.size !== meta.size && clock.now() - outfileStat.mtimeMs < timeout) {
             await sleep(1000);
             outfileStat = fs.statSync(outfile, { throwIfNoEntry: false });
         }
         if (outfileStat && outfileStat.size === meta.size) {
             // successfully downloaded by another caller
-            return outfile;
+            return { outfile, conn };
         }
         // must have timed out, overwrite file
     }
@@ -43,5 +53,5 @@ export const downloadSourceAsset = async (
     await conn.read(srcPath, (chunk: Buffer) => fs.writeSync(fd, chunk));
     fs.closeSync(fd);
 
-    return outfile;
+    return { outfile, conn };
 };

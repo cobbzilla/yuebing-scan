@@ -3,11 +3,12 @@ import { MobilettoLogger } from "mobiletto-common";
 import { basename } from "mobiletto-orm-typedef";
 import { sleep } from "mobiletto-orm-scan-typedef";
 import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } from "yuebing-model";
-import { applyProfile, ApplyProfileResponse, loadProfile, ParsedProfile } from "yuebing-media";
+import { applyProfile, ApplyProfileResponse, assetPath, loadProfile, ParsedProfile } from "yuebing-media";
 import { prepareOutputDir, runExternalCommand } from "./util.js";
 import { acquireLock } from "./lock.js";
 import { downloadSourceAsset } from "./download.js";
 import { YbTransformer } from "./ybTransformer.js";
+import { MobilettoConnection } from "mobiletto-base";
 
 const JOB_TIMEOUT = 1000 * 60 * 60 * 24;
 
@@ -17,6 +18,7 @@ export const execTransform = async (
     profile: ParsedProfile,
     job: ProfileJobType,
     logger: MobilettoLogger,
+    conn: MobilettoConnection,
 ): Promise<string | null> => {
     if (!profile.operationObject) {
         logger.error(`execTransform: no profile.operationObject for profile=${profile.name}`);
@@ -27,7 +29,14 @@ export const execTransform = async (
         return null;
     }
     const outDir = prepareOutputDir(assetDir, downloaded, profile);
-    const response: ApplyProfileResponse = await applyProfile(downloaded, profile.media, profile.name, outDir);
+    const response: ApplyProfileResponse = await applyProfile(
+        downloaded,
+        profile.media,
+        profile.name,
+        outDir,
+        assetPath(job.asset),
+        conn,
+    );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
         if (response.analysis) {
@@ -76,13 +85,14 @@ export const transformAsset = async (
     );
     if (!lock) return false;
 
-    const downloaded = await downloadSourceAsset(
+    const downloadResult = await downloadSourceAsset(
         xform.config.downloadDir,
         job.asset,
         xform.config.sourceRepo(),
         xform.clock,
     );
-    if (!downloaded) return false; // source asset had no name, should never happen
+    if (!downloadResult) return false; // should not happen
+    const downloaded = downloadResult.outfile;
 
     const profile = loadProfile(job.profile);
     if (!profile.media) {
@@ -101,7 +111,14 @@ export const transformAsset = async (
     }
 
     // run the transform
-    const outDir = await execTransform(xform.config.assetDir, downloaded, profile, job, xform.config.logger);
+    const outDir = await execTransform(
+        xform.config.assetDir,
+        downloaded,
+        profile,
+        job,
+        xform.config.logger,
+        downloadResult.conn,
+    );
     if (!outDir) {
         xform.config.logger.warn("transformAsset: no outDir returned from execTransform");
         return false;
