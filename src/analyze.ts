@@ -40,6 +40,7 @@ const execAnalyze = async (
         outDir,
         assetPath(sourceAsset.name),
         conn,
+        [],
     );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
@@ -92,6 +93,7 @@ export const analyzeAsset = async (
     const profileJob: ProfileJobType = {
         name: jobName,
         profile: profile.name,
+        analysis: true,
         asset: sourceAsset.name,
         owner: analyzer.config.systemName,
         status: "started",
@@ -171,6 +173,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
         if (!foundJob) {
             const profileJob: ProfileJobType = {
                 name: jobName,
+                analysis: false,
                 profile: transformProfile.name,
                 asset: sourceAsset.name,
             };

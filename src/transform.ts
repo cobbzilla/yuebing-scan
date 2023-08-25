@@ -24,6 +24,7 @@ export const execTransform = async (
     job: ProfileJobType,
     logger: MobilettoLogger,
     conn: MobilettoConnection,
+    analysisResults: ProfileJobType[],
 ): Promise<ApplyTransformResponse | null> => {
     if (!profile.operationObject) {
         logger.error(`execTransform: no profile.operationObject for profile=${profile.name}`);
@@ -41,6 +42,7 @@ export const execTransform = async (
         outDir,
         assetPath(job.asset),
         conn,
+        analysisResults,
     );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
@@ -114,6 +116,11 @@ export const transformAsset = async (
         return false;
     }
 
+    // find analysis results
+    const analysisResults = (await jobRepo.findBy("asset", job.asset, {
+        predicate: (j) => j.analysis === true,
+    })) as ProfileJobType[];
+
     // run the transform
     const response = await execTransform(
         xform.config.assetDir,
@@ -122,6 +129,7 @@ export const transformAsset = async (
         job,
         xform.config.logger,
         downloadResult.conn,
+        analysisResults,
     );
     if (!response) {
         xform.config.logger.warn("transformAsset: no response returned from execTransform");
