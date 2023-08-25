@@ -5,6 +5,7 @@ export declare class YbTransformer {
     readonly clock: MobilettoClock;
     readonly removeLocalFiles: boolean;
     readonly transformerPollInterval: number;
+    readonly uploadPollInterval: number;
     timeout: number | object | null;
     running: boolean;
     stopping: boolean;

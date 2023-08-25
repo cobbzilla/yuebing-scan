@@ -1,6 +1,7 @@
 import { MobilettoLogger } from "mobiletto-common";
+import { MobilettoConnection } from "mobiletto-base";
 import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
-import { MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
+import { DestinationType, MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
 import {
     applyProfile,
     ApplyProfileResponse,
@@ -10,10 +11,10 @@ import {
     ParsedProfile,
     runExternalCommand,
 } from "yuebing-media";
-import { profileJobName, prepareOutputDir } from "./util.js";
+import { profileJobName, prepareOutputDir, TransformResult } from "./util.js";
 import { downloadSourceAsset } from "./download.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
-import { MobilettoConnection } from "mobiletto-base";
+import { uploadFiles } from "./upload.js";
 
 const execAnalyze = async (
     assetDir: string,
@@ -24,7 +25,7 @@ const execAnalyze = async (
     sourceAsset: SourceAssetType,
     conn: MobilettoConnection,
     clock: MobilettoClock,
-): Promise<ProfileJobType | null> => {
+): Promise<TransformResult | null> => {
     if (!profile.operationObject) {
         logger.error(`execAnalyze: no profile.operationObject for profile=${profile.name}`);
         return null;
@@ -75,7 +76,7 @@ const execAnalyze = async (
             return null;
         }
     }
-    return profileJob;
+    return { outDir, response };
 };
 
 export const analyzeAsset = async (
@@ -84,44 +85,67 @@ export const analyzeAsset = async (
     downloaded: string,
     profile: ParsedProfile,
     conn: MobilettoConnection,
-) => {
+): Promise<boolean> => {
     const assetDir = analyzer.config.assetDir;
-    if (!profile.operationObject || !assetDir) return null; // should never happen
+    if (!profile.operationObject || !assetDir) return false; // should never happen
 
     const jobName = profileJobName(sourceAsset, profile);
 
     const profileJobRepo = analyzer.config.profileJobRepo();
-    const profileJob: ProfileJobType = {
+    const job: ProfileJobType = {
         name: jobName,
         profile: profile.name,
+        operation: profile.operation,
         analysis: true,
         asset: sourceAsset.name,
         owner: analyzer.config.systemName,
         status: "started",
         started: analyzer.clock.now(),
     };
-    await execAnalyze(
+    const result: TransformResult | null = await execAnalyze(
         assetDir,
         downloaded,
         profile,
-        profileJob,
+        job,
         analyzer.config.logger,
         sourceAsset,
         conn,
         analyzer.clock,
     );
+    if (!result) {
+        analyzer.config.logger.warn("transformAsset: no result returned from execTransform");
+        return false;
+    }
+    if (!result.outDir) {
+        analyzer.config.logger.warn("transformAsset: no result.outDir returned from execTransform");
+        return false;
+    }
+    if (!result.response) {
+        analyzer.config.logger.warn("transformAsset: no result.response returned from execTransform");
+        return false;
+    }
     const existingAnalysis = await profileJobRepo.safeFindById(jobName);
     if (existingAnalysis) {
-        console.info(
-            `analyze: updating analysis profileJob: ${JSON.stringify(profileJob)} (previous=${JSON.stringify(
+        analyzer.config.logger.info(
+            `analyze: updating analysis profileJob: ${JSON.stringify(job)} (previous=${JSON.stringify(
                 existingAnalysis,
             )})`,
         );
-        await profileJobRepo.update(profileJob);
+        await profileJobRepo.update(job);
     } else {
-        console.info(`analyze: creating analysis profileJob: ${JSON.stringify(profileJob)}`);
-        await profileJobRepo.create(profileJob);
+        console.info(`analyze: creating analysis profileJob: ${JSON.stringify(job)}`);
+        await profileJobRepo.create(job);
     }
+    if (result.response.upload) {
+        const destRepo = analyzer.config.destinationRepo();
+        const destinations = (await destRepo.safeFindBy("assets", true)) as DestinationType[];
+        if (!destinations || destinations.length === 0) {
+            analyzer.config.logger.error("analyze: no destinations!");
+        } else {
+            await uploadFiles(result, profile, job, destinations, analyzer);
+        }
+    }
+    return true;
 };
 
 export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: SourceAssetType) => {
@@ -176,6 +200,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
                 name: jobName,
                 analysis: false,
                 profile: transformProfile.name,
+                operation: transformProfile.operation,
                 asset: sourceAsset.name,
             };
             console.info(`analyze: creating transform profileJob: ${JSON.stringify(profileJob)}`);

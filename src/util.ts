@@ -1,7 +1,9 @@
 import fs from "fs";
 import { basename, sha } from "mobiletto-orm-typedef";
-import { SourceAssetType } from "yuebing-model";
-import { ParsedProfile } from "yuebing-media";
+import { SourceAssetType, UploadJobType } from "yuebing-model";
+import { ApplyProfileResponse, ParsedProfile } from "yuebing-media";
+import { MobilettoLogger } from "mobiletto-common";
+import { MobilettoOrmRepository } from "mobiletto-orm";
 
 export const prepareOutputDir = (assetDir: string, downloaded: string, profile: ParsedProfile): string => {
     const outDir = `${assetDir}/${profile.name}/${sha(downloaded)}`;
@@ -13,6 +15,20 @@ export const prepareOutputDir = (assetDir: string, downloaded: string, profile: 
 
 export const profileJobName = (sourceAsset: SourceAssetType, profile: ParsedProfile): string => {
     return [profile.name, basename(sourceAsset.name), sha(sourceAsset.name)].join("~");
+};
+
+export type TransformerDaemonType = {
+    config: {
+        logger: MobilettoLogger;
+        uploadJobRepo: () => MobilettoOrmRepository<UploadJobType>;
+    };
+    stopping: boolean;
+    uploadPollInterval: number;
+};
+
+export type TransformResult = {
+    outDir: string;
+    response: ApplyProfileResponse;
 };
 
 const MIN_XFER_TIMEOUT = 1000 * 60; // 1 minute

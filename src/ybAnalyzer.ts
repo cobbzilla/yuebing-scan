@@ -3,6 +3,7 @@ import { SourceAssetType, SourceAssetTypeDef } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
 import { analyzeSourceAsset } from "./analyze.js";
+import { DEFAULT_UPLOAD_POLL_INTERVAL } from "./upload.js";
 
 const DOWNLOAD_LOCK_TIMEOUT = 1000 * 60 * 60; // 1 hour
 const DEFAULT_ANALYZER_POLL_INTERVAL = 1000 * 60;
@@ -11,6 +12,7 @@ export class YbAnalyzer {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
     readonly analyzerPollInterval: number;
+    readonly uploadPollInterval: number;
 
     timeout: number | object | null = null;
     running: boolean = false;
@@ -23,6 +25,9 @@ export class YbAnalyzer {
         this.analyzerPollInterval = config.analyzerPollInterval
             ? config.analyzerPollInterval
             : DEFAULT_ANALYZER_POLL_INTERVAL;
+        this.uploadPollInterval = config.uploaderPollInterval
+            ? config.uploaderPollInterval
+            : DEFAULT_UPLOAD_POLL_INTERVAL;
     }
     start() {
         if (!this.timeout) {

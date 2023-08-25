@@ -2,6 +2,7 @@ import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef
 import { DestinationType } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 import { transformAsset } from "./transform.js";
+import { DEFAULT_UPLOAD_POLL_INTERVAL } from "./upload.js";
 
 const DEFAULT_JOB_POLL_INTERVAL = 1000 * 60;
 
@@ -10,6 +11,7 @@ export class YbTransformer {
     readonly clock: MobilettoClock;
     readonly removeLocalFiles: boolean;
     readonly transformerPollInterval: number;
+    readonly uploadPollInterval: number;
 
     timeout: number | object | null = null;
     running: boolean = false;
@@ -22,6 +24,9 @@ export class YbTransformer {
         this.transformerPollInterval = config.transformerPollInterval
             ? config.transformerPollInterval
             : DEFAULT_JOB_POLL_INTERVAL;
+        this.uploadPollInterval = config.uploaderPollInterval
+            ? config.uploaderPollInterval
+            : DEFAULT_UPLOAD_POLL_INTERVAL;
     }
     start() {
         if (!this.timeout) {

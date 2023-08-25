@@ -90,10 +90,16 @@ const uploadAsset = async (
 ): Promise<boolean> => {
     const destRepo = uploader.config.destinationRepo();
     const dest = await destRepo.findById(job.destination);
-    const conn = await connectVolume(dest);
     const destPath = destinationPath(job.asset, job.media, job.profile, job.localPath);
-    const reader = fs.createReadStream(job.localPath);
-    await conn.write(destPath, reader);
+    const conn = await connectVolume(dest);
+
+    // Only upload if the destination file does not exist, or has a different size than the local file
+    const localStat = fs.statSync(job.localPath);
+    const existingMeta = await conn.safeMetadata(destPath);
+    if (!existingMeta || existingMeta.size !== localStat.size) {
+        const reader = fs.createReadStream(job.localPath);
+        await conn.write(destPath, reader);
+    }
 
     // update lock, mark finished
     job.owner = uploader.config.systemName; // should be the same, but whatever

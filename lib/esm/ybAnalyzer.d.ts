@@ -5,6 +5,7 @@ export declare class YbAnalyzer {
     readonly config: YbScanConfig;
     readonly clock: MobilettoClock;
     readonly analyzerPollInterval: number;
+    readonly uploadPollInterval: number;
     timeout: number | object | null;
     running: boolean;
     paused: boolean;
