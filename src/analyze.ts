@@ -8,8 +8,9 @@ import {
     fileExtWithoutDot,
     loadProfile,
     ParsedProfile,
+    runExternalCommand,
 } from "yuebing-media";
-import { profileJobName, prepareOutputDir, runExternalCommand } from "./util.js";
+import { profileJobName, prepareOutputDir } from "./util.js";
 import { downloadSourceAsset } from "./download.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
 import { MobilettoConnection } from "mobiletto-base";

@@ -3,8 +3,15 @@ import { MobilettoLogger } from "mobiletto-common";
 import { basename } from "mobiletto-orm-typedef";
 import { sleep } from "mobiletto-orm-scan-typedef";
 import { DestinationType, ProfileJobType, ProfileJobTypeDef, UploadJobType } from "yuebing-model";
-import { applyProfile, ApplyProfileResponse, assetPath, loadProfile, ParsedProfile } from "yuebing-media";
-import { prepareOutputDir, runExternalCommand } from "./util.js";
+import {
+    applyProfile,
+    ApplyProfileResponse,
+    assetPath,
+    loadProfile,
+    ParsedProfile,
+    runExternalCommand,
+} from "yuebing-media";
+import { prepareOutputDir } from "./util.js";
 import { acquireLock } from "./lock.js";
 import { downloadSourceAsset } from "./download.js";
 import { YbTransformer } from "./ybTransformer.js";
