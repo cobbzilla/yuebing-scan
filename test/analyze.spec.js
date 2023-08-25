@@ -34,9 +34,9 @@ describe("analyze test", async () => {
         expect(analyzed[0].finished).is.not.null;
         expect(analyzed[0].finished).gt(analyzed[0].started);
         expect(analyzed[0].finished).gt(finishedScans[0].started);
-        expect(analyzed[0].analysis).is.not.null;
-        expect(analyzed[0].analysis).is.not.undefined;
-        const analysis = JSON.parse(analyzed[0].analysis);
+        expect(analyzed[0].result).is.not.null;
+        expect(analyzed[0].result).is.not.undefined;
+        const analysis = JSON.parse(analyzed[0].result);
         expect(analysis).eq(5);
     });
 });

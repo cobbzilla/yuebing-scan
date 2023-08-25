@@ -43,10 +43,10 @@ const execAnalyze = async (
     );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
-        if (response.analysis) {
+        if (response.result) {
             profileJob.status = "finished";
             profileJob.finished = clock.now();
-            profileJob.analysis = JSON.stringify(response.analysis);
+            profileJob.result = JSON.stringify(response.result);
         } else {
             logger.error(`execAnalyze: analysis=null profile=${profile.name} asset=${sourceAsset.name}`);
             return null;
@@ -61,7 +61,7 @@ const execAnalyze = async (
             if (result.exitCode === 0) {
                 profileJob.status = "finished";
                 profileJob.finished = clock.now();
-                profileJob.analysis = result.stdout;
+                profileJob.result = result.stdout;
             } else {
                 logger.error(
                     `execAnalyze: exitCode=${result.exitCode} args=${response.args} profile=${profile.name} asset=${sourceAsset.name} stdout=${result.stdout} stderr=${result.stderr}`,

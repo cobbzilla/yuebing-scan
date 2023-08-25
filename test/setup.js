@@ -62,7 +62,7 @@ const mediaDriver = {
         if (!profile.operation) throw new Error(`applyProfile: no operation defined for profile: ${profile.name}`);
         if (profile.operation === OP_WORDCOUNT) {
             return {
-                analysis: await countWordsInFile(downloaded),
+                result: await countWordsInFile(downloaded),
             };
         } else if (profile.operation === OP_UPCASE) {
             return { args: [downloaded, outDir] };

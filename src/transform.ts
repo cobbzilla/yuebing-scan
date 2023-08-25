@@ -12,6 +12,11 @@ import { MobilettoConnection } from "mobiletto-base";
 
 const JOB_TIMEOUT = 1000 * 60 * 60 * 24;
 
+type ApplyTransformResponse = {
+    outDir: string;
+    response: ApplyProfileResponse;
+};
+
 export const execTransform = async (
     assetDir: string,
     downloaded: string,
@@ -19,7 +24,7 @@ export const execTransform = async (
     job: ProfileJobType,
     logger: MobilettoLogger,
     conn: MobilettoConnection,
-): Promise<string | null> => {
+): Promise<ApplyTransformResponse | null> => {
     if (!profile.operationObject) {
         logger.error(`execTransform: no profile.operationObject for profile=${profile.name}`);
         return null;
@@ -39,13 +44,12 @@ export const execTransform = async (
     );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
-        if (response.analysis) {
-            // did not expect analysis response from transform profile
-            logger.error(
-                `execTransform: unexpected analysis=${response.analysis} profile=${profile.name} asset=${job.asset}`,
-            );
+        if (!response.result) {
+            // expected result response from transform profile
+            logger.error(`execTransform: no result for profile=${profile.name} asset=${job.asset}`);
             return null;
         }
+        return { outDir, response };
     } else {
         if (response.args && response.args.length > 0) {
             if (!profile.operationObject.command) {
@@ -65,7 +69,7 @@ export const execTransform = async (
             return null;
         }
     }
-    return outDir;
+    return { outDir, response };
 };
 
 export const transformAsset = async (
@@ -111,7 +115,7 @@ export const transformAsset = async (
     }
 
     // run the transform
-    const outDir = await execTransform(
+    const response = await execTransform(
         xform.config.assetDir,
         downloaded,
         profile,
@@ -119,12 +123,21 @@ export const transformAsset = async (
         xform.config.logger,
         downloadResult.conn,
     );
-    if (!outDir) {
-        xform.config.logger.warn("transformAsset: no outDir returned from execTransform");
+    if (!response) {
+        xform.config.logger.warn("transformAsset: no response returned from execTransform");
+        return false;
+    }
+    if (!response.outDir) {
+        xform.config.logger.warn("transformAsset: no response.outDir returned from execTransform");
+        return false;
+    }
+    if (!response.response) {
+        xform.config.logger.warn("transformAsset: no response.response returned from execTransform");
         return false;
     }
 
     // create an upload job for each relevant file in outDir, for each destination
+    const outDir = response.outDir;
     const files = fs.readdirSync(outDir).map(basename);
     const extFiles = files.filter((f) => f.endsWith("." + profile.ext));
     const toUpload: string[] = [];
