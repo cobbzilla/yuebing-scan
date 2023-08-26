@@ -21,7 +21,7 @@ import {
     SourceTypeDef,
     UploadJobTypeDef,
 } from "yuebing-model";
-import { ASSET_SEP, registerMediaDriver } from "yuebing-media";
+import { ASSET_SEP, registerMediaPlugin } from "yuebing-media";
 import { YbScanner } from "../lib/esm/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -57,7 +57,7 @@ export const TEST_OPS = {
 
 export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
-const mediaDriver = {
+const mediaPlugin = {
     applyProfile: async (downloaded, profile, outDir) => {
         if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
         if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
@@ -84,7 +84,7 @@ const mediaDriver = {
 };
 
 let storageDriverRegistered = false;
-let mediaDriverRegistered = false;
+let mediaPluginRegistered = false;
 
 export const newTest = async (adjustTest) => {
     if (!storageDriverRegistered) {
@@ -161,7 +161,7 @@ export const newTest = async (adjustTest) => {
     };
     test.media = await test.mediaRepo.create(test.media);
 
-    for (const p of mediaDriver.defaultProfiles) {
+    for (const p of mediaPlugin.defaultProfiles) {
         await test.mediaProfileRepo.create(p);
     }
 
@@ -223,8 +223,8 @@ export const newTest = async (adjustTest) => {
 
     if (adjustTest) await adjustTest(test);
 
-    if (!mediaDriverRegistered) {
-        await registerMediaDriver(test.media, mediaDriver, test.mediaProfileRepo);
+    if (!mediaPluginRegistered) {
+        await registerMediaPlugin(test.media, mediaPlugin, test.mediaProfileRepo);
     }
 
     test.scanner = new YbScanner(test.scanConfig);
