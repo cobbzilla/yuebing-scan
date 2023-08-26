@@ -24,7 +24,7 @@ export const uploadFiles = async (
     if (extFiles && extFiles.length > 0) {
         toUpload.push(...extFiles);
     } else {
-        daemon.config.logger.warn(`transformAsset: no extFiles matched ext=${profile.ext} for profile ${profile.name}`);
+        daemon.config.logger.warn(`uploadFiles: no extFiles matched ext=${profile.ext} for profile ${profile.name}`);
     }
     if (profile.additionalAssetsRegexes && profile.additionalAssetsRegexes.length > 0) {
         for (const re of profile.additionalAssetsRegexes) {
@@ -47,7 +47,7 @@ export const uploadFiles = async (
                 destination: dest.name,
                 size: stat.size,
             };
-            console.info(`transform: creating uploadJob: ${JSON.stringify(uploadJob)}`);
+            console.info(`uploadFiles: creating uploadJob: ${JSON.stringify(uploadJob)}`);
             await uploadJobRepo.create(uploadJob);
         }
     }
@@ -56,13 +56,13 @@ export const uploadFiles = async (
     while (!daemon.stopping) {
         const jobs = (await uploadJobRepo.safeFindBy("asset", job.asset)) as UploadJobType[];
         if (jobs.length === 0) {
-            daemon.config.logger.info(`transform: error finding upload jobs for asset: ${job.asset}`);
+            daemon.config.logger.info(`uploadFiles: error finding upload jobs for asset: ${job.asset}`);
             return false;
         }
         const unfinished = jobs.filter((j) => j.status !== "finished");
         if (unfinished.length === 0) break;
-        daemon.config.logger.info(`waiting for ${unfinished.length} upload jobs to finish`);
+        daemon.config.logger.info(`uploadFiles: waiting for ${unfinished.length} upload jobs to finish`);
         await sleep(daemon.uploadPollInterval);
     }
-    if (daemon.stopping) return false;
+    return !daemon.stopping;
 };

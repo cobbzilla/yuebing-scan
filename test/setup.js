@@ -59,31 +59,25 @@ export const TEST_OPS = {
 
 export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
+const OP_FUNC_WORDCOUNT = async (downloaded) => ({ result: await countWordsInFile(downloaded) });
+const OP_FUNC_UPCASE = async (downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
+
+const OP_FUNCS = {
+    [OP_WORDCOUNT]: OP_FUNC_WORDCOUNT,
+    [OP_UPCASE]: OP_FUNC_UPCASE,
+};
+
 export const textMediaPlugin = {
     media: {
         name: TEXT_MEDIA,
         ext: ["txt"],
     },
-    applyProfile: async (downloaded, profile, outDir) => {
-        if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
-        if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
-        if (!profile.operation) throw new Error(`applyProfile: no operation defined for profile: ${profile.name}`);
-        if (profile.operation === OP_WORDCOUNT) {
-            return {
-                result: await countWordsInFile(downloaded),
-            };
-        } else if (profile.operation === OP_UPCASE) {
-            return { args: [downloaded, outDir] };
-        } else {
-            throw new Error(`invalid operation: ${profile.operation}`);
-        }
-    },
-    operations: TEST_OPS,
+    operationFunction: (op) => OP_FUNCS[op],
+    operations: () => TEST_OPS,
     operationConfigType: () => undefined,
-    defaultProfiles: [
+    defaultProfiles: () => [
         {
             name: ANALYSIS_PROFILE_NAME,
-            media: TEXT_MEDIA,
             operation: OP_WORDCOUNT,
         },
     ],

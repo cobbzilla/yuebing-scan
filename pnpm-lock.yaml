@@ -63,14 +63,14 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   yuebing-media:
-    specifier: ^1.1.23
-    version: 1.1.23
+    specifier: ^1.1.26
+    version: 1.1.26
   yuebing-messages:
     specifier: ^2.1.9
     version: 2.1.9
   yuebing-model:
-    specifier: ^2.7.27
-    version: 2.7.27
+    specifier: ^2.7.28
+    version: 2.7.28
   zilla-util:
     specifier: ^1.0.1
     version: 1.0.1
@@ -1678,8 +1678,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /yuebing-media@1.1.23:
-    resolution: {integrity: sha512-hZchBtjXMMqW0oMOsFojt9HFD/AUEnoKMomZ7wUgD7kqEucD8z72K2od+KuJBt2UajBTl+fbPOwKFwIlYsOOBQ==}
+  /yuebing-media@1.1.26:
+    resolution: {integrity: sha512-nM1wLYbcrj+r+HiQBgdjl9j40FaO5ut/Mho1ubMMvPMOt/TGV2IXJm/t8bbhtfHsolK0lGCqs2KUhxaRuCquOg==}
     dev: true
 
   /yuebing-messages@2.1.9:
@@ -1688,8 +1688,8 @@ packages:
       hokey-runtime: 1.0.8
     dev: true
 
-  /yuebing-model@2.7.27:
-    resolution: {integrity: sha512-rl0AcP0m6nNaWOrlSBrzJYTnd1ef0GfXY5+XcWKcAjWmgvIAREoFewugPtCF6lEgFuZUt6sRqvUMU3kPn+F5Ig==}
+  /yuebing-model@2.7.28:
+    resolution: {integrity: sha512-PfJA3R0vPyJgboRZrsIoHxkJnKN4yF8WSWPbjk6ThTvHcWNMYuG3SFq/ORZ8trwjWjfiCCttrAqRfzQdQ7YElw==}
     dev: true
 
   /zilla-util@1.0.1:
