@@ -63,8 +63,8 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   yuebing-media:
-    specifier: ^1.1.29
-    version: 1.1.29
+    specifier: ^1.1.30
+    version: 1.1.30
   yuebing-messages:
     specifier: ^2.1.9
     version: 2.1.9
@@ -563,7 +563,7 @@ packages:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      luxon: 3.4.1
+      luxon: 3.4.2
     dev: true
 
   /cross-spawn@7.0.3:
@@ -1126,8 +1126,8 @@ packages:
       yallist: 4.0.0
     dev: true
 
-  /luxon@3.4.1:
-    resolution: {integrity: sha512-2USspxOCXWGIKHwuQ9XElxPPYrDOJHDQ5DQ870CoD+CxJbBnRDIBCfhioUJJjct7BKOy80Ia8cVstIcIMb/0+Q==}
+  /luxon@3.4.2:
+    resolution: {integrity: sha512-uBoAVCVcajsrqy3pv7eo5jEUz1oeLmCcnMv8n4AJpT5hbpN9lUssAXibNElpbLce3Mhm9dyBzwYLs9zctM/0tA==}
     engines: {node: '>=12'}
     dev: true
 
@@ -1678,8 +1678,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /yuebing-media@1.1.29:
-    resolution: {integrity: sha512-PSt2g1/u5KY2ZTbTqa/VP2XbBdVyOOmzv2/znbIXECips+Ymr1mm70kt/aHQZs0/cts9QtgBbYEFywmU+ey3fA==}
+  /yuebing-media@1.1.30:
+    resolution: {integrity: sha512-A5PuH1XMye80dV1uxiGxai/5C5joHeGO3VKSeJ4bQmDlQmTGBra21MJDItBh+66IKvccVesPhiMapjKB+Eq4bA==}
     dev: true
 
   /yuebing-messages@2.1.9:
