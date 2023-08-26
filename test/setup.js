@@ -224,13 +224,7 @@ export const newTest = async (adjustTest) => {
     if (adjustTest) await adjustTest(test);
 
     if (!mediaDriverRegistered) {
-        await registerMediaDriver(
-            test.media,
-            mediaDriver,
-            test.mediaProfileRepo,
-            test.mediaOperationRepo,
-            test.mediaPropertyRepo,
-        );
+        await registerMediaDriver(test.media, mediaDriver, test.mediaProfileRepo);
     }
 
     test.scanner = new YbScanner(test.scanConfig);
