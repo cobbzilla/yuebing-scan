@@ -178,11 +178,6 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
     }
 
     for (const m of medias) {
-        if (m.from) {
-            const fromMedia = await mediaRepo.findById(m.from);
-            const fromProfiles = (await mediaProfileRepo.safeFindBy("media", fromMedia.name)) as MediaProfileType[];
-            await addProfiles(fromProfiles);
-        }
         const mainProfiles = (await mediaProfileRepo.safeFindBy("media", m.name)) as MediaProfileType[];
         await addProfiles(mainProfiles);
     }

@@ -1,4 +1,5 @@
-import { OP_UPCASE, TEST_OPS } from "./setup.js";
+import { OP_UPCASE, TEST_OPS, textMediaPlugin } from "./setup.js";
+import { updateMediaProfile } from "yuebing-media";
 
 export const TRANSFORM_PROFILE_NAME = "toUpperCase";
 
@@ -12,11 +13,11 @@ export const setupTransformObjects = async (test) => {
         command: `${test.testDir}/upcase.sh`,
         minFileSize: 10,
     };
-    await test.mediaProfileRepo.create({
+    const upcaseProfile = {
         name: TRANSFORM_PROFILE_NAME,
         operation: OP_UPCASE,
-        media: "textMedia",
         ext: "txt",
         contentType: "text/plain",
-    });
+    };
+    await updateMediaProfile(textMediaPlugin, upcaseProfile, test.mediaProfileRepo);
 };

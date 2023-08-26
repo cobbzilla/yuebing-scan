@@ -56,7 +56,7 @@ export const execTransform = async (
     } else {
         if (response.args && response.args.length > 0) {
             if (!profile.operationObject.command) {
-                logger.error(`execAnalyze: no profile.operationObject.command for profile=${profile.name}`);
+                logger.error(`execTransform: no profile.operationObject.command for profile=${profile.name}`);
                 return null;
             }
             // todo: record progress

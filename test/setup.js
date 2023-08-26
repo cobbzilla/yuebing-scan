@@ -45,10 +45,12 @@ const countWordsInFile = async (filePath) => {
 export const OP_WORDCOUNT = "wordCount";
 export const OP_UPCASE = "uppercase";
 
+const TEXT_MEDIA = "textMedia";
+
 export const TEST_OPS = {
     [OP_WORDCOUNT]: {
         name: OP_WORDCOUNT,
-        media: "textMedia",
+        media: TEXT_MEDIA,
         analysis: true,
         func: true,
         minFileSize: 0,
@@ -57,7 +59,11 @@ export const TEST_OPS = {
 
 export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
-const mediaPlugin = {
+export const textMediaPlugin = {
+    media: {
+        name: TEXT_MEDIA,
+        ext: ["txt"],
+    },
     applyProfile: async (downloaded, profile, outDir) => {
         if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
         if (!profile.enabled) throw new Error(`applyProfile: profile not enabled: ${profile.name}`);
@@ -77,7 +83,7 @@ const mediaPlugin = {
     defaultProfiles: [
         {
             name: ANALYSIS_PROFILE_NAME,
-            media: "textMedia",
+            media: TEXT_MEDIA,
             operation: OP_WORDCOUNT,
         },
     ],
@@ -155,21 +161,15 @@ export const newTest = async (adjustTest) => {
     };
     test.destination = await test.destinationRepo.create(test.destination);
 
-    test.media = {
-        name: "textMedia",
-        ext: ["txt"],
-    };
-    test.media = await test.mediaRepo.create(test.media);
-
-    for (const p of mediaPlugin.defaultProfiles) {
-        await test.mediaProfileRepo.create(p);
+    if (!mediaPluginRegistered) {
+        await registerMediaPlugin(textMediaPlugin, test.mediaRepo, test.mediaProfileRepo);
     }
 
     test.library = {
         name: "tempLibrary",
         sources: ["tempSource"],
         destinations: ["tempDestination"],
-        media: "textMedia",
+        media: TEXT_MEDIA,
         autoscanEnabled: true,
         autoscan: { interval: 10000 },
     };
@@ -222,10 +222,6 @@ export const newTest = async (adjustTest) => {
     test.assetName = test.source.name + ASSET_SEP + "sample.txt";
 
     if (adjustTest) await adjustTest(test);
-
-    if (!mediaPluginRegistered) {
-        await registerMediaPlugin(test.media, mediaPlugin, test.mediaProfileRepo);
-    }
 
     test.scanner = new YbScanner(test.scanConfig);
     return test;
