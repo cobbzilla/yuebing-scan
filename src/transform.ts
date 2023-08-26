@@ -52,7 +52,7 @@ export const execTransform = async (
             logger.error(`execTransform: no result for profile=${profile.name} asset=${job.asset}`);
             return null;
         }
-        return { outDir, response };
+        return { outDir, response, job };
     } else {
         if (response.args && response.args.length > 0) {
             if (!profile.operationObject.command) {
@@ -72,7 +72,7 @@ export const execTransform = async (
             return null;
         }
     }
-    return { outDir, response };
+    return { outDir, response, job };
 };
 
 export const transformAsset = async (

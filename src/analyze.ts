@@ -1,7 +1,14 @@
 import { sleep, ZillaClock } from "zilla-util";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoConnection } from "mobiletto-base";
-import { DestinationType, MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
+import {
+    DestinationType,
+    MediaProfileType,
+    MediaType,
+    PROFILE_SORT_PRIORITY,
+    ProfileJobType,
+    SourceAssetType,
+} from "yuebing-model";
 import {
     applyProfile,
     ApplyProfileResponse,
@@ -20,11 +27,12 @@ const execAnalyze = async (
     assetDir: string,
     downloaded: string,
     profile: ParsedProfile,
-    profileJob: ProfileJobType,
+    job: ProfileJobType,
     logger: MobilettoLogger,
     sourceAsset: SourceAssetType,
     conn: MobilettoConnection,
     clock: ZillaClock,
+    analysisResults: ProfileJobType[],
 ): Promise<TransformResult | null> => {
     if (!profile.operationObject) {
         logger.error(`execAnalyze: no profile.operationObject for profile=${profile.name}`);
@@ -42,14 +50,14 @@ const execAnalyze = async (
         outDir,
         assetPath(sourceAsset.name),
         conn,
-        [],
+        analysisResults,
     );
     if (profile.operationObject.func) {
         // applyProfile actually ran the job, we should be done
         if (response.result) {
-            profileJob.status = "finished";
-            profileJob.finished = clock.now();
-            profileJob.result = JSON.stringify(response.result);
+            job.status = "finished";
+            job.finished = clock.now();
+            job.result = JSON.stringify(response.result);
         } else {
             logger.error(`execAnalyze: analysis=null profile=${profile.name} asset=${sourceAsset.name}`);
             return null;
@@ -62,9 +70,9 @@ const execAnalyze = async (
             }
             const result = await runExternalCommand(profile.operationObject.command, response.args);
             if (result.exitCode === 0) {
-                profileJob.status = "finished";
-                profileJob.finished = clock.now();
-                profileJob.result = result.stdout;
+                job.status = "finished";
+                job.finished = clock.now();
+                job.result = result.stdout;
             } else {
                 logger.error(
                     `execAnalyze: exitCode=${result.exitCode} args=${response.args} profile=${profile.name} asset=${sourceAsset.name} stdout=${result.stdout} stderr=${result.stderr}`,
@@ -76,7 +84,7 @@ const execAnalyze = async (
             return null;
         }
     }
-    return { outDir, response };
+    return { outDir, response, job };
 };
 
 export const analyzeAsset = async (
@@ -85,9 +93,10 @@ export const analyzeAsset = async (
     downloaded: string,
     profile: ParsedProfile,
     conn: MobilettoConnection,
-): Promise<boolean> => {
+    analysisResults: ProfileJobType[],
+): Promise<TransformResult | null> => {
     const assetDir = analyzer.config.assetDir;
-    if (!profile.operationObject || !assetDir) return false; // should never happen
+    if (!profile.operationObject || !assetDir) return null; // should never happen
 
     const jobName = profileJobName(sourceAsset, profile);
 
@@ -111,18 +120,19 @@ export const analyzeAsset = async (
         sourceAsset,
         conn,
         analyzer.clock,
+        analysisResults,
     );
     if (!result) {
         analyzer.config.logger.warn("transformAsset: no result returned from execTransform");
-        return false;
+        return null;
     }
     if (!result.outDir) {
         analyzer.config.logger.warn("transformAsset: no result.outDir returned from execTransform");
-        return false;
+        return null;
     }
     if (!result.response) {
         analyzer.config.logger.warn("transformAsset: no result.response returned from execTransform");
-        return false;
+        return null;
     }
     const existingAnalysis = await profileJobRepo.safeFindById(jobName);
     if (existingAnalysis) {
@@ -145,7 +155,7 @@ export const analyzeAsset = async (
             await uploadFiles(result, profile, job, destinations, analyzer);
         }
     }
-    return true;
+    return result;
 };
 
 export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: SourceAssetType) => {
@@ -182,12 +192,23 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
         await addProfiles(mainProfiles);
     }
 
-    for (const analyzeProfile of analysisProfiles) {
-        await analyzeAsset(analyzer, sourceAsset, downloaded, analyzeProfile, downloadResult.conn);
+    const analysisResults: ProfileJobType[] = [];
+    for (const analyzeProfile of analysisProfiles.sort(PROFILE_SORT_PRIORITY)) {
+        const result = await analyzeAsset(
+            analyzer,
+            sourceAsset,
+            downloaded,
+            analyzeProfile,
+            downloadResult.conn,
+            analysisResults,
+        );
+        if (result && result.job) {
+            analysisResults.push(result.job);
+        }
     }
 
     const jobRepo = analyzer.config.profileJobRepo();
-    for (const transformProfile of transformProfiles) {
+    for (const transformProfile of transformProfiles.sort(PROFILE_SORT_PRIORITY)) {
         const jobName = profileJobName(sourceAsset, transformProfile);
         const foundJob = await jobRepo.safeFindById(jobName);
         if (!foundJob) {

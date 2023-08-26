@@ -1,4 +1,4 @@
-import { SourceAssetType, UploadJobType } from "yuebing-model";
+import { ProfileJobType, SourceAssetType, UploadJobType } from "yuebing-model";
 import { ApplyProfileResponse, ParsedProfile } from "yuebing-media";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoOrmRepository } from "mobiletto-orm";
@@ -15,5 +15,6 @@ export type TransformerDaemonType = {
 export type TransformResult = {
     outDir: string;
     response: ApplyProfileResponse;
+    job: ProfileJobType;
 };
 export declare const transferTimeout: (size: number, bandwidth?: number, minTimeout?: number, maxTimeout?: number) => number;

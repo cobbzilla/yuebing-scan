@@ -1,6 +1,6 @@
 import fs from "fs";
 import { basename, sha } from "mobiletto-orm-typedef";
-import { SourceAssetType, UploadJobType } from "yuebing-model";
+import { ProfileJobType, SourceAssetType, UploadJobType } from "yuebing-model";
 import { ApplyProfileResponse, ParsedProfile } from "yuebing-media";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoOrmRepository } from "mobiletto-orm";
@@ -29,6 +29,7 @@ export type TransformerDaemonType = {
 export type TransformResult = {
     outDir: string;
     response: ApplyProfileResponse;
+    job: ProfileJobType;
 };
 
 const MIN_XFER_TIMEOUT = 1000 * 60; // 1 minute
