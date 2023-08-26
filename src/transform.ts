@@ -106,7 +106,7 @@ export const transformAsset = async (
         xform.config.logger.warn(`transformAsset: skipping profile without media: ${profile.name}`);
         return false;
     }
-    if (!profile.enabled) {
+    if (profile.enabled === false) {
         // job should not have been created
         xform.config.logger.warn(`transformAsset: skipping disabled profile: ${profile.name}`);
         return false;

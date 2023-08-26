@@ -167,7 +167,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
 
     async function addProfiles(fromProfiles: MediaProfileType[]) {
         for (const p of fromProfiles) {
-            if (p.noop || !p.enabled) continue;
+            if (p.noop || p.enabled === false) continue;
             const parsedProfile = loadProfile(p.name);
             if (parsedProfile.operationObject && parsedProfile.operationObject.analysis) {
                 analysisProfiles.push(parsedProfile);
