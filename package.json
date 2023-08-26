@@ -1,18 +1,12 @@
 {
   "name": "yuebing-scan",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
-    "storage",
-    "s3",
-    "b2",
-    "simple",
-    "filesystem",
-    "orm",
-    "tool",
-    "mobiletto",
-    "mobiletto-orm"
+    "yuebing",
+    "media",
+    "scan"
   ],
   "homepage": "https://github.com/cobbzilla/yuebing-scan",
   "author": "Jonathan Cobb <udo9jqld@duck.com> (https://github.com/cobbzilla)",
@@ -61,7 +55,7 @@
     "prettier": "^3.0.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^5.1.6",
-    "yuebing-media": "^1.1.15",
+    "yuebing-media": "^1.1.16",
     "yuebing-messages": "^2.1.9",
     "yuebing-model": "^2.7.25"
   }

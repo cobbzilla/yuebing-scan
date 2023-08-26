@@ -55,6 +55,8 @@ export const TEST_OPS = {
     },
 };
 
+export const ANALYSIS_PROFILE_NAME = "wordCounter";
+
 const mediaDriver = {
     applyProfile: async (downloaded, profile, outDir) => {
         if (profile.noop) throw new Error(`applyProfile: cannot apply noop profile: ${profile.name}`);
@@ -72,12 +74,17 @@ const mediaDriver = {
     },
     operations: TEST_OPS,
     operationConfigType: () => undefined,
+    defaultProfiles: [
+        {
+            name: ANALYSIS_PROFILE_NAME,
+            media: "textMedia",
+            operation: OP_WORDCOUNT,
+        },
+    ],
 };
 
 let storageDriverRegistered = false;
 let mediaDriverRegistered = false;
-
-export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
 export const newTest = async (adjustTest) => {
     if (!storageDriverRegistered) {
@@ -154,12 +161,9 @@ export const newTest = async (adjustTest) => {
     };
     test.media = await test.mediaRepo.create(test.media);
 
-    test.mediaProfile = {
-        name: ANALYSIS_PROFILE_NAME,
-        media: "textMedia",
-        operation: OP_WORDCOUNT,
-    };
-    test.mediaProfile = await test.mediaProfileRepo.create(test.mediaProfile);
+    for (const p of mediaDriver.defaultProfiles) {
+        await test.mediaProfileRepo.create(p);
+    }
 
     test.library = {
         name: "tempLibrary",
