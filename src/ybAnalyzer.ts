@@ -1,4 +1,4 @@
-import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
+import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
 import { SourceAssetType, SourceAssetTypeDef } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
@@ -10,7 +10,7 @@ const DEFAULT_ANALYZER_POLL_INTERVAL = 1000 * 60;
 
 export class YbAnalyzer {
     readonly config: YbScanConfig;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly analyzerPollInterval: number;
     readonly uploadPollInterval: number;
 

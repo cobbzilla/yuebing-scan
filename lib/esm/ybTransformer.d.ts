@@ -1,8 +1,8 @@
-import { MobilettoClock } from "mobiletto-orm-scan-typedef";
+import { ZillaClock } from "zilla-util";
 import { YbScanConfig } from "./config.js";
 export declare class YbTransformer {
     readonly config: YbScanConfig;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly removeLocalFiles: boolean;
     readonly transformerPollInterval: number;
     readonly uploadPollInterval: number;

@@ -1,5 +1,5 @@
+import { ZillaClock } from "zilla-util";
 import { LibraryType } from "yuebing-model";
-import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { YbScanConfig } from "./config.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
@@ -9,7 +9,7 @@ export declare const DEFAULT_SCAN_CHECK_INTERVAL: number;
 export declare class YbScanner {
     readonly config: YbScanConfig;
     readonly scanPollInterval: number;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly initTime: number;
     timeout: number | object | null;
     running: boolean;

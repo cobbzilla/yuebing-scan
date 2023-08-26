@@ -1,5 +1,5 @@
+import { ZillaClock } from "zilla-util";
 import { MobilettoOrmObject, MobilettoOrmRepository, MobilettoOrmTypeDef } from "mobiletto-orm";
-import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 import { MobilettoLogger } from "mobiletto-common";
 
 export type MobilettoLockType = MobilettoOrmObject & {
@@ -12,7 +12,7 @@ export type MobilettoLockType = MobilettoOrmObject & {
 const claimLock = async <LOCK extends MobilettoLockType>(
     lock: LOCK,
     systemName: string,
-    clock: MobilettoClock,
+    clock: ZillaClock,
     lockRepo: MobilettoOrmRepository<LOCK>,
     targetId: string,
     logger: MobilettoLogger,
@@ -38,7 +38,7 @@ const claimLock = async <LOCK extends MobilettoLockType>(
 
 export const acquireLock = async <LOCK extends MobilettoLockType>(
     systemName: string,
-    clock: MobilettoClock,
+    clock: ZillaClock,
     logger: MobilettoLogger,
     lockRepo: MobilettoOrmRepository<LOCK>,
     targetId: string,

@@ -1,4 +1,4 @@
-import { sleep } from "mobiletto-orm-scan-typedef";
+import { sleep } from "zilla-util";
 import { LibraryType } from "yuebing-model";
 import { YbScanner } from "./ybScanner";
 

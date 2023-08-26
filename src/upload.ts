@@ -1,7 +1,7 @@
 import fs from "fs";
+import { sleep } from "zilla-util";
 import { basename } from "mobiletto-orm-typedef";
 import { DestinationType, ProfileJobType, UploadJobType } from "yuebing-model";
-import { sleep } from "mobiletto-orm-scan-typedef";
 import { TransformerDaemonType, TransformResult } from "./util.js";
 import { ParsedProfile } from "yuebing-media";
 

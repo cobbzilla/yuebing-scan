@@ -1,6 +1,6 @@
 import fs from "fs";
+import { ZillaClock, sleep } from "zilla-util";
 import { MobilettoOrmRepository } from "mobiletto-orm";
-import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { sha } from "mobiletto-orm-typedef";
 import { MobilettoConnection } from "mobiletto-base";
 import { connectVolume, SourceAssetType, SourceType } from "yuebing-model";
@@ -16,7 +16,7 @@ export const downloadSourceAsset = async (
     downloadDir: string,
     sourceAsset: SourceAssetType | string,
     sourceRepo: MobilettoOrmRepository<SourceType>,
-    clock: MobilettoClock,
+    clock: ZillaClock,
 ): Promise<DownloadAssetResult | null> => {
     const assetName = typeof sourceAsset === "string" ? assetPath(sourceAsset) : sourceAsset.name;
     if (!assetName) return null; // should never happen

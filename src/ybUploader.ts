@@ -1,6 +1,6 @@
 import * as fs from "fs";
+import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
 import { MobilettoOrmRepository } from "mobiletto-orm";
-import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { connectVolume, UploadJobType, UploadJobTypeDef } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
 import { transferTimeout } from "./util.js";
@@ -11,7 +11,7 @@ const DEFAULT_UPLOAD_POLL_INTERVAL = 1000 * 60;
 
 export class YbUploader {
     readonly config: YbScanConfig;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly removeLocalFiles: boolean;
     readonly uploaderPollInterval: number;
 

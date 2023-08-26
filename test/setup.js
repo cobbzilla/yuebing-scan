@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as os from "os";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import { sleep } from "zilla-util";
 import { rand, repositoryFactory } from "mobiletto-orm";
 import { logger, mobiletto, registerDriver, shutdownMobiletto } from "mobiletto-base";
 import { storageClient as localDriver } from "mobiletto-driver-local";
@@ -20,7 +21,6 @@ import {
     SourceTypeDef,
     UploadJobTypeDef,
 } from "yuebing-model";
-import { sleep } from "mobiletto-orm-scan-typedef";
 import { ASSET_SEP, registerMediaDriver } from "yuebing-media";
 import { YbScanner } from "../lib/esm/index.js";
 

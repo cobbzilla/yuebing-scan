@@ -1,7 +1,7 @@
+import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
 import { MobilettoMetadata } from "mobiletto-common";
 import { SourceAssetType, LibraryScanType, LibraryType, MediaType, LibraryScanTypeDef } from "yuebing-model";
 import { MobilettoOrmObject } from "mobiletto-orm";
-import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { ASSET_SEP } from "yuebing-media";
 import { YbScanConfig } from "./config.js";
@@ -16,7 +16,7 @@ export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
 export class YbScanner {
     readonly config: YbScanConfig;
     readonly scanPollInterval: number;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly initTime: number;
 
     timeout: number | object | null = null;

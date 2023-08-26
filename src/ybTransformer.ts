@@ -1,4 +1,4 @@
-import { DEFAULT_CLOCK, MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
+import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
 import { DestinationType } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 import { transformAsset } from "./transform.js";
@@ -8,7 +8,7 @@ const DEFAULT_JOB_POLL_INTERVAL = 1000 * 60;
 
 export class YbTransformer {
     readonly config: YbScanConfig;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly removeLocalFiles: boolean;
     readonly transformerPollInterval: number;
     readonly uploadPollInterval: number;

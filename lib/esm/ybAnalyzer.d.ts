@@ -1,9 +1,9 @@
-import { MobilettoClock } from "mobiletto-orm-scan-typedef";
+import { ZillaClock } from "zilla-util";
 import { SourceAssetType } from "yuebing-model";
 import { YbScanConfig } from "./config.js";
 export declare class YbAnalyzer {
     readonly config: YbScanConfig;
-    readonly clock: MobilettoClock;
+    readonly clock: ZillaClock;
     readonly analyzerPollInterval: number;
     readonly uploadPollInterval: number;
     timeout: number | object | null;

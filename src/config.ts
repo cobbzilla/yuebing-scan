@@ -1,3 +1,4 @@
+import { ZillaClock } from "zilla-util";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoOrmRepository } from "mobiletto-orm";
 import {
@@ -14,7 +15,6 @@ import {
     UploadJobType,
 } from "yuebing-model";
 import { MobilettoConnection } from "mobiletto-base";
-import { MobilettoClock } from "mobiletto-orm-scan-typedef";
 
 export type YbScanConfig = {
     systemName: string;
@@ -33,7 +33,7 @@ export type YbScanConfig = {
     sourceConnections: Record<string, MobilettoConnection>;
     downloadDir: string;
     assetDir: string;
-    clock?: MobilettoClock;
+    clock?: ZillaClock;
     scanPollInterval?: number;
     analyzerPollInterval?: number;
     transformerPollInterval?: number;

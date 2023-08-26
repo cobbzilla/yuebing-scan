@@ -1,6 +1,6 @@
+import { sleep, ZillaClock } from "zilla-util";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoConnection } from "mobiletto-base";
-import { MobilettoClock, sleep } from "mobiletto-orm-scan-typedef";
 import { DestinationType, MediaProfileType, MediaType, ProfileJobType, SourceAssetType } from "yuebing-model";
 import {
     applyProfile,
@@ -24,7 +24,7 @@ const execAnalyze = async (
     logger: MobilettoLogger,
     sourceAsset: SourceAssetType,
     conn: MobilettoConnection,
-    clock: MobilettoClock,
+    clock: ZillaClock,
 ): Promise<TransformResult | null> => {
     if (!profile.operationObject) {
         logger.error(`execAnalyze: no profile.operationObject for profile=${profile.name}`);
