@@ -1,6 +1,6 @@
 {
   "name": "yuebing-scan",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
