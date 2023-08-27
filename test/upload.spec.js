@@ -77,6 +77,7 @@ describe("upload test", async () => {
         // transformed file should now be available at the destination
         const destConnResult = await connectVolume(test.destination);
         const destConn = destConnResult.connection;
+        expect(destConn).is.not.undefined;
         expect(destConn).is.not.null;
         const destPath = destinationPath(uploadJob.asset, uploadJob.media, uploadJob.profile, uploadJob.localPath);
         const uploadedData = await destConn.safeReadFile(destPath);
