@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { before, after, describe, it } from "mocha";
 import { expect } from "chai";
 import { waitForNonemptyQuery, newTest, ANALYSIS_PROFILE_NAME, cleanupTest } from "./setup.js";
-import { setupTransformObjects, TRANSFORM_PROFILE_NAME } from "./xform-helper.js";
+import { setupTransformObjects, XFORM_UPCASE_PROFILE_NAME } from "./test-helper.js";
 
 let test;
 
@@ -36,7 +36,7 @@ describe("transform test", async () => {
         const startedTransforms = await waitForNonemptyQuery(
             () =>
                 test.profileJobRepo.safeFindBy("asset", test.assetName, {
-                    predicate: (a) => a.profile === TRANSFORM_PROFILE_NAME,
+                    predicate: (a) => a.profile === XFORM_UPCASE_PROFILE_NAME,
                 }),
             (a) => a.status === "started",
         );

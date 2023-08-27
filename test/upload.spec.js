@@ -2,7 +2,12 @@ import * as fs from "fs";
 import { before, after, describe, it } from "mocha";
 import { expect } from "chai";
 import { waitForNonemptyQuery, newTest, ANALYSIS_PROFILE_NAME, cleanupTest } from "./setup.js";
-import { setupTransformObjects, TRANSFORM_PROFILE_NAME } from "./xform-helper.js";
+import {
+    setupTransformObjects,
+    setupUploadObjects,
+    XFORM_SPLIT_PROFILE_NAME,
+    XFORM_UPCASE_PROFILE_NAME,
+} from "./test-helper.js";
 import { connectVolume } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
 
@@ -11,10 +16,22 @@ let test;
 before(async () => {
     test = await newTest(async (test) => {
         await setupTransformObjects(test);
+        await setupUploadObjects(test);
         test.scanConfig.runUploader = true;
         test.scanConfig.removeLocalFiles = false;
     });
 });
+
+async function expectUploads(profileJob) {
+    const uploadJobs = await test.uploadJobRepo.safeFindBy("asset", test.assetName, {
+        predicate: (j) => j.profile === profileJob.profile,
+    });
+    for (const uploadJob of uploadJobs) {
+        expect(uploadJob.status).eq("finished");
+        expect(uploadJob.finished).lt(profileJob.finished); // upload finishes, then xform
+    }
+    return uploadJobs;
+}
 
 describe("upload test", async () => {
     it("should scan a directory, discover an asset, analyze it, transform it, and upload it", async () => {
@@ -36,24 +53,25 @@ describe("upload test", async () => {
         });
         expect(analyzed[0].status).eq("finished");
 
-        // wait for transform job to finish
-        const finishedTransforms = await waitForNonemptyQuery(
+        // wait for upcase job to finish
+        const finishedUpcaseJobs = await waitForNonemptyQuery(
             () =>
                 test.profileJobRepo.safeFindBy("asset", test.assetName, {
-                    predicate: (a) => a.profile === TRANSFORM_PROFILE_NAME,
+                    predicate: (a) => a.profile === XFORM_UPCASE_PROFILE_NAME,
                 }),
             (a) => a.status === "finished",
         );
-        expect(finishedTransforms[0].asset).eq(test.assetName);
+        expect(finishedUpcaseJobs.length).eq(1);
+
+        const upcaseJob = finishedUpcaseJobs[0];
+        expect(upcaseJob.asset).eq(test.assetName);
 
         // UploadJob should already be finished
-        const uploadJobs = await test.uploadJobRepo.safeFindBy("asset", test.assetName);
+        const uploadJobs = await expectUploads(upcaseJob);
         expect(uploadJobs.length).eq(1);
         const uploadJob = uploadJobs[0];
-        expect(uploadJob.status).eq("finished");
-        expect(uploadJob.finished).lt(finishedTransforms[0].finished); // upload finishes, then xform
-        const orig = fs.readFileSync(test.testDir + "/source/sample.txt").toString();
         const data = fs.readFileSync(uploadJob.localPath, "utf8").toString();
+        const orig = fs.readFileSync(test.testDir + "/source/sample.txt").toString();
         expect(data).eq(orig.toUpperCase());
 
         // transformed file should now be available at the destination
@@ -62,6 +80,25 @@ describe("upload test", async () => {
         const uploadedData = await destConn.safeReadFile(destPath);
         expect(uploadedData).is.not.null;
         expect(uploadedData.toString()).eq(data);
+
+        // wait for split job to finish
+        const finishedSplitJobs = await waitForNonemptyQuery(
+            () =>
+                test.profileJobRepo.safeFindBy("asset", test.assetName, {
+                    predicate: (a) => a.profile === XFORM_SPLIT_PROFILE_NAME,
+                }),
+            (a) => a.status === "finished",
+        );
+        expect(finishedSplitJobs.length).eq(1);
+
+        const splitJob = finishedSplitJobs[0];
+        expect(splitJob.asset).eq(test.assetName);
+
+        // UploadJob should already be finished
+        const splitUploads = await expectUploads(splitJob);
+        expect(splitUploads.length).eq(6); // 5 word files + 1 summary file
+        const summary = splitUploads.filter((u) => u.localPath.endsWith("summary.md"));
+        expect(summary.length).eq(1);
     });
 });
 

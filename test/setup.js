@@ -44,6 +44,7 @@ const countWordsInFile = async (filePath) => {
 
 export const OP_WORDCOUNT = "wordCount";
 export const OP_UPCASE = "uppercase";
+export const OP_SPLIT_WORDS_INTO_FILES = "splitWordsIntoFiles";
 
 const TEXT_MEDIA = "textMedia";
 
@@ -61,10 +62,12 @@ export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
 const OP_FUNC_WORDCOUNT = async (downloaded) => ({ result: await countWordsInFile(downloaded) });
 const OP_FUNC_UPCASE = async (downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
+const OP_FUNC_SPLIT_WORDS = async (downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
 
 const OP_FUNCS = {
     [OP_WORDCOUNT]: OP_FUNC_WORDCOUNT,
     [OP_UPCASE]: OP_FUNC_UPCASE,
+    [OP_SPLIT_WORDS_INTO_FILES]: OP_FUNC_SPLIT_WORDS,
 };
 
 export const textMediaPlugin = {
