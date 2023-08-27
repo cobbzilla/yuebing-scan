@@ -14,6 +14,7 @@ export declare class YbScanner {
     timeout: number | object | null;
     running: boolean;
     stopping: boolean;
+    readonly runScanner: boolean;
     readonly scanner: MobilettoScanner;
     readonly analyzer: YbAnalyzer;
     readonly runAnalyzer: boolean;

@@ -25,6 +25,7 @@ export type YbScanConfig = {
     analyzerPollInterval?: number;
     transformerPollInterval?: number;
     uploaderPollInterval?: number;
+    runScanner?: boolean;
     runAnalyzer?: boolean;
     runTransformer?: boolean;
     runUploader?: boolean;

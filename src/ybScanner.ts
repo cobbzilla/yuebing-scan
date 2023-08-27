@@ -23,8 +23,8 @@ export class YbScanner {
     running: boolean = false;
     stopping: boolean = false;
 
+    readonly runScanner: boolean;
     readonly scanner: MobilettoScanner;
-
     readonly analyzer: YbAnalyzer;
     readonly runAnalyzer: boolean;
     readonly transformer: YbTransformer;
@@ -38,6 +38,7 @@ export class YbScanner {
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
         this.initTime = this.clock.now();
         this.scanner = new MobilettoScanner(this.config.systemName, this.scanPollInterval, this.clock);
+        this.runScanner = this.config.runScanner !== false;
         this.analyzer = new YbAnalyzer(this.config);
         this.runAnalyzer = this.config.runAnalyzer !== false;
         this.transformer = new YbTransformer(this.config);
@@ -48,9 +49,9 @@ export class YbScanner {
     }
 
     start() {
-        if (!this.timeout) {
+        if (this.runScanner) {
             if (this.running) {
-                this.config.logger.info(`start: already running (but timeout was null?)`);
+                this.config.logger.info(`start: already running`);
             } else {
                 this.running = true;
                 this.timeout = setTimeout(() => ybScanLoop(this), 1);
