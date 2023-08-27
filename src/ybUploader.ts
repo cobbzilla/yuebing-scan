@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
 import { MobilettoOrmRepository } from "mobiletto-orm";
-import { connectVolume, UploadJobType, UploadJobTypeDef } from "yuebing-model";
+import { UploadJobType, UploadJobTypeDef } from "yuebing-model";
 import { destinationPath } from "yuebing-media";
+import { connectVolume } from "yuebing-server-util";
 import { transferTimeout } from "./util.js";
 import { YbScanConfig } from "./config.js";
 import { acquireLock } from "./lock.js";
@@ -91,7 +92,11 @@ const uploadAsset = async (
     const destRepo = uploader.config.destinationRepo();
     const dest = await destRepo.findById(job.destination);
     const destPath = destinationPath(job.asset, job.media, job.profile, job.localPath);
-    const conn = await connectVolume(dest);
+    const connResult = await connectVolume(dest);
+    if (connResult.error || !connResult.connection) {
+        throw new Error(`uploadAsset(${job.asset}): error creating connection: ${connResult.error}`);
+    }
+    const conn = connResult.connection;
 
     // Only upload if the destination file does not exist, or has a different size than the local file
     const localStat = fs.statSync(job.localPath);

@@ -8,7 +8,6 @@ import { logger, mobiletto, registerDriver, shutdownMobiletto } from "mobiletto-
 import { storageClient as localDriver } from "mobiletto-driver-local";
 
 import {
-    resolveConnectionConfig,
     DestinationTypeDef,
     LibraryScanTypeDef,
     LibraryTypeDef,
@@ -21,6 +20,7 @@ import {
     SourceTypeDef,
     UploadJobTypeDef,
 } from "yuebing-model";
+import { resolveConnectionConfig } from "yuebing-server-util";
 import { ASSET_SEP, registerMediaPlugin } from "yuebing-media";
 import { YbScanner } from "../lib/esm/index.js";
 

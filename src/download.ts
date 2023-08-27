@@ -3,7 +3,8 @@ import { ZillaClock, sleep } from "zilla-util";
 import { MobilettoOrmRepository } from "mobiletto-orm";
 import { sha } from "mobiletto-orm-typedef";
 import { MobilettoConnection } from "mobiletto-base";
-import { connectVolume, SourceAssetType, SourceType } from "yuebing-model";
+import { SourceAssetType, SourceType } from "yuebing-model";
+import { connectVolume } from "yuebing-server-util";
 import { assetPath, assetSource, fileExtWithDot } from "yuebing-media";
 import { transferTimeout } from "./util.js";
 
@@ -28,7 +29,11 @@ export const downloadSourceAsset = async (
     const outfile = downloadDir + "/downloaded_" + sha(assetName) + ext;
     let outfileStat = fs.statSync(outfile, { throwIfNoEntry: false });
     const source = await sourceRepo.findById(sourceName);
-    const conn = await connectVolume(source);
+    const connResult = await connectVolume(source);
+    if (connResult.error || !connResult.connection) {
+        throw new Error(`downloadSourceAsset(${sourceAsset}): error creating connection: ${connResult.error}`);
+    }
+    const conn = connResult.connection;
     const meta = await conn.metadata(srcPath);
     if (!meta.size) {
         throw new Error(`downloadSourceAsset(${sourceAsset}): meta.size was not defined`);

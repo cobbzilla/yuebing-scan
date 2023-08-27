@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import { before, after, describe, it } from "mocha";
 import { expect } from "chai";
+import { connectVolume } from "yuebing-server-util";
+import { destinationPath } from "yuebing-media";
 import { waitForNonemptyQuery, newTest, ANALYSIS_PROFILE_NAME, cleanupTest } from "./setup.js";
 import {
     setupTransformObjects,
@@ -8,8 +10,6 @@ import {
     XFORM_SPLIT_PROFILE_NAME,
     XFORM_UPCASE_PROFILE_NAME,
 } from "./test-helper.js";
-import { connectVolume } from "yuebing-model";
-import { destinationPath } from "yuebing-media";
 
 let test;
 
@@ -75,7 +75,9 @@ describe("upload test", async () => {
         expect(data).eq(orig.toUpperCase());
 
         // transformed file should now be available at the destination
-        const destConn = await connectVolume(test.destination);
+        const destConnResult = await connectVolume(test.destination);
+        const destConn = destConnResult.connection;
+        expect(destConn).is.not.null;
         const destPath = destinationPath(uploadJob.asset, uploadJob.media, uploadJob.profile, uploadJob.localPath);
         const uploadedData = await destConn.safeReadFile(destPath);
         expect(uploadedData).is.not.null;
