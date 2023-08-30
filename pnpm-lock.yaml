@@ -48,8 +48,8 @@ devDependencies:
     specifier: ^1.0.15
     version: 1.0.15
   mobiletto-orm-typedef:
-    specifier: ^2.4.10
-    version: 2.4.10
+    specifier: ^2.4.16
+    version: 2.4.16
   mocha:
     specifier: ^10.2.0
     version: 10.2.0
@@ -66,11 +66,11 @@ devDependencies:
     specifier: ^1.1.43
     version: 1.1.43
   yuebing-messages:
-    specifier: ^2.1.21
-    version: 2.1.21
+    specifier: ^2.1.22
+    version: 2.1.22
   yuebing-model:
-    specifier: ^2.7.53
-    version: 2.7.53
+    specifier: ^2.7.54
+    version: 2.7.54
   yuebing-server-util:
     specifier: ^1.0.2
     version: 1.0.2
@@ -1199,8 +1199,8 @@ packages:
     resolution: {integrity: sha512-ItFPXWW1f8p/BxayQGnjYyR4Y404SV63eExU9cJm4PdHcZpDKpoJ4i9h583/SnGTs6hlLh7T/LKgy6AQEDgBQA==}
     dev: true
 
-  /mobiletto-orm-typedef@2.4.10:
-    resolution: {integrity: sha512-udFgR+b7ePxexrWRhn4dA8svRdbyzslxq4ri7VvtufXgKs8gMYIA8ysJ4qgK780qB3XkOcqOK3hHLj2Zz14K5A==}
+  /mobiletto-orm-typedef@2.4.16:
+    resolution: {integrity: sha512-yBaYtaQpNCO9aY8t56+QVlTBtcFDaf9L3/4bGTyus2dsLUEe9iv9Ahs3KpOa6saRhDxmo5pOylBTBwqu5YaU+A==}
     dependencies:
       shasum: 1.0.2
       uuid: 9.0.0
@@ -1685,14 +1685,14 @@ packages:
     resolution: {integrity: sha512-zTxGJ2BDlnJXSRZmmn+mv8E0KLXrjI7w/uCSy+ipDXxzipNL5gpIUqmrntDl1gX8IKlnu4ObwL0KtMAndfiyPg==}
     dev: true
 
-  /yuebing-messages@2.1.21:
-    resolution: {integrity: sha512-VPDPArKvKrM/jBycu3+UQ3mQL6IgNuv+CowNq7r/mkfe/fciOuVsbS95x3Um0rvu5OgsyYZW45tJOSBR4DeXqw==}
+  /yuebing-messages@2.1.22:
+    resolution: {integrity: sha512-FwNXw7ANEAxN/eNi+eb91jkyOmtYDzl9v+mI685frTrQa0FhxRPI62m8XP9PNzVHXOBrsiwrqSlaaiYaBqEd0w==}
     dependencies:
       hokey-runtime: 1.0.9
     dev: true
 
-  /yuebing-model@2.7.53:
-    resolution: {integrity: sha512-DGW49N/RQBYKnM+v1UkLUkgDS80YlFsD1czl3J0R18j4DchJSooaKB+fKu94p2xz3yDD321Oh1h04JQ1HgigXg==}
+  /yuebing-model@2.7.54:
+    resolution: {integrity: sha512-+u+qy9iivEGvzGbj0wVlT3JH5IZL0csd7i1KUwGDWN6TzOyVizBFiDyFCGbHuY9XvC0QhB/6jLlpW5+OSssMmw==}
     dev: true
 
   /yuebing-server-util@1.0.2:

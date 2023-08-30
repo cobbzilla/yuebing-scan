@@ -4,14 +4,19 @@ import { YbScanner } from "./ybScanner";
 
 export const ybScanLoop = async (ybScan: YbScanner) => {
     let first = true;
+    let scanPollInterval = ybScan.scanPollInterval;
     try {
         while (!ybScan.stopping) {
-            if (!first) await sleep(ybScan.scanPollInterval);
+            if (!first) await sleep(scanPollInterval);
             else first = false;
 
             try {
                 // is scanning enabled in the config?
                 const cfg = await ybScan.config.localConfigRepo().findSingleton();
+                if (cfg.scanPollInterval) {
+                    // local config can change, update poll interval when we reload local config
+                    scanPollInterval = cfg.scanPollInterval;
+                }
                 if (!cfg.autoscanEnabled) continue;
                 // are we beyond our initial delay?
                 if (cfg.autoscan?.initialDelay && ybScan.clock.now() - ybScan.initTime < cfg.autoscan?.initialDelay) {

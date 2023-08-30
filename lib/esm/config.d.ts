@@ -17,7 +17,7 @@ export type YbScanConfig = {
     sourceAssetRepo: () => MobilettoOrmRepository<SourceAssetType>;
     profileJobRepo: () => MobilettoOrmRepository<ProfileJobType>;
     uploadJobRepo: () => MobilettoOrmRepository<UploadJobType>;
-    sourceConnections: Record<string, MobilettoConnection>;
+    connectSource: (name: string) => Promise<MobilettoConnection>;
     downloadDir: string;
     assetDir: string;
     clock?: ZillaClock;

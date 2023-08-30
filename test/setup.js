@@ -115,7 +115,6 @@ export const newTest = async (adjustTest) => {
         media: null,
         library: null,
         connectionConfig: null,
-        sourceConnections: null,
         downloadDir: null,
         assetDir: null,
         localConfig: null,
@@ -173,15 +172,14 @@ export const newTest = async (adjustTest) => {
     test.library = await test.libraryRepo.create(test.library);
 
     test.connectionConfig = resolveConnectionConfig(test.source);
-    test.sourceConnections = {
-        tempSource: await mobiletto(
+    const connectSource = async () =>
+        mobiletto(
             test.source.type,
             test.connectionConfig.key,
             test.connectionConfig.secret,
             test.connectionConfig.opts,
             test.source.encryption,
-        ),
-    };
+        );
 
     test.localConfig = {
         systemName: "testSystem",
@@ -204,7 +202,7 @@ export const newTest = async (adjustTest) => {
         sourceAssetRepo: () => test.sourceAssetRepo,
         profileJobRepo: () => test.profileJobRepo,
         uploadJobRepo: () => test.uploadJobRepo,
-        sourceConnections: test.sourceConnections,
+        connectSource,
         downloadDir: test.downloadDir,
         assetDir: test.assetDir,
         runAnalyzer: false,

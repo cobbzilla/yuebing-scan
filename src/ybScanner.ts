@@ -11,7 +11,7 @@ import { YbAnalyzer } from "./ybAnalyzer.js";
 import { YbTransformer } from "./ybTransformer.js";
 import { YbUploader } from "./ybUploader.js";
 
-export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 60 * 24;
+export const DEFAULT_SCAN_CHECK_INTERVAL = 1000 * 60 * 10;
 
 export class YbScanner {
     readonly config: YbScanConfig;
@@ -144,7 +144,7 @@ export class YbScanner {
     }
 
     async scanSource(sourceName: string, fileExt: string[]) {
-        const source = this.config.sourceConnections[sourceName];
+        const source = await this.config.connectSource(sourceName);
         let success = false;
         let done = false;
         let error = undefined;
