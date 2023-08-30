@@ -25,6 +25,6 @@ export declare class YbScanner {
     constructor(config: YbScanConfig);
     start(): void;
     stop(): void;
-    scanLibrary(lib: LibraryType, interval: number): Promise<void>;
+    scanLibrary(lib: LibraryType, timeout: number): Promise<void>;
     scanSource(sourceName: string, fileExt: string[]): Promise<MobilettoStorageScan>;
 }

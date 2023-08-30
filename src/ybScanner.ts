@@ -71,7 +71,7 @@ export class YbScanner {
         this.uploader.stop();
     }
 
-    async scanLibrary(lib: LibraryType, interval: number) {
+    async scanLibrary(lib: LibraryType, timeout: number) {
         let lock: LibraryScanType | null = null;
         try {
             lock = await acquireLock(
@@ -81,7 +81,7 @@ export class YbScanner {
                 this.config.libraryScanRepo(),
                 lib.name,
                 LibraryScanTypeDef,
-                interval,
+                timeout,
             );
             if (!lock) {
                 this.config.logger.debug(
