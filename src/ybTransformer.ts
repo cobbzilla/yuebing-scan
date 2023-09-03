@@ -53,7 +53,7 @@ const ybTransformLoop = async (xform: YbTransformer) => {
 
                 let processed = false;
                 if (!destinations || destinations.length === 0) {
-                    xform.config.logger.error("ybTransformLoop: no destinations!");
+                    xform.config.logger.error("ybTransformLoop: no destinations found with assets=true");
                 } else {
                     const job = await jobRepo.safeFindFirstBy("status", "pending");
                     if (xform.stopping) break;
