@@ -47,7 +47,7 @@ export const uploadFiles = async (
                 destination: dest.name,
                 size: stat.size,
             };
-            console.info(`uploadFiles: creating uploadJob: ${JSON.stringify(uploadJob)}`);
+            daemon.config.logger.info(`uploadFiles: creating uploadJob: ${JSON.stringify(uploadJob)}`);
             await uploadJobRepo.create(uploadJob);
         }
     }

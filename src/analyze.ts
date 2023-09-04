@@ -143,7 +143,7 @@ export const analyzeAsset = async (
         );
         await profileJobRepo.update(job);
     } else {
-        console.info(`analyze: creating analysis profileJob: ${JSON.stringify(job)}`);
+        analyzer.config.logger.info(`analyze: creating analysis profileJob: ${JSON.stringify(job)}`);
         await profileJobRepo.create(job);
     }
     if (result.response.upload) {
@@ -219,7 +219,7 @@ export const analyzeSourceAsset = async (analyzer: YbAnalyzer, sourceAsset: Sour
                 operation: transformProfile.operation,
                 asset: sourceAsset.name,
             };
-            console.info(`analyze: creating transform profileJob: ${JSON.stringify(profileJob)}`);
+            analyzer.config.logger.info(`analyze: creating transform profileJob: ${JSON.stringify(profileJob)}`);
             await jobRepo.create(profileJob);
         }
     }

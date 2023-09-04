@@ -151,7 +151,7 @@ export const transformAsset = async (
     lock.owner = xform.config.systemName; // should be the same, but whatever
     lock.status = "finished";
     lock.finished = xform.clock.now();
-    console.info(`transform: updating finished profileJob: ${JSON.stringify(lock)}`);
+    xform.config.logger.info(`transform: updating finished profileJob: ${JSON.stringify(lock)}`);
     jobRepo.update(lock).then((l) => {
         xform.config.logger.info(`finished: ${JSON.stringify(l)}`);
     });

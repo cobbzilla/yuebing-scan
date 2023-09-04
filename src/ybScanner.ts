@@ -85,7 +85,7 @@ export class YbScanner {
             );
             if (!lock) {
                 this.config.logger.debug(
-                    `scanLibrary system=${this.config.systemName} lib=${lib.name} error=acquiring_lock`,
+                    `scanLibrary: system=${this.config.systemName} lib=${lib.name} error=acquiring_lock`,
                 );
                 return;
             }
@@ -116,11 +116,15 @@ export class YbScanner {
                     new Promise<void>((resolve, reject) => {
                         this.scanSource(s, fileExt)
                             .then(() => {
-                                console.info(`YbScanner: scanSource finished: source=${JSON.stringify(s)}`);
+                                this.config.logger.info(
+                                    `scanLibrary: scanSource finished: source=${JSON.stringify(s)}`,
+                                );
                                 resolve();
                             })
                             .catch((e: Error) => {
-                                console.error(`YbScanner: scanSource error: source=${JSON.stringify(s)} error=${e}`);
+                                this.config.logger.error(
+                                    `scanLibrary: scanSource error: source=${JSON.stringify(s)} error=${e}`,
+                                );
                                 reject(e);
                             });
                     }),
@@ -132,7 +136,7 @@ export class YbScanner {
                 lock.owner = this.config.systemName; // should be the same, but whatever
                 lock.status = "finished";
                 lock.finished = this.clock.now();
-                console.info(`transform: updating finished libraryScan: ${JSON.stringify(lock)}`);
+                this.config.logger.info(`scanLibrary: updating finished libraryScan: ${JSON.stringify(lock)}`);
                 this.config
                     .libraryScanRepo()
                     .update(lock)
@@ -165,7 +169,7 @@ export class YbScanner {
                             owner: this.config.systemName,
                             status: "pending",
                         };
-                        console.info(`YbScanner: creating sourceAsset: ${JSON.stringify(asset)}`);
+                        this.config.logger.info(`YbScanner: creating sourceAsset: ${JSON.stringify(asset)}`);
                         await sourceAssetRepo.create(asset);
                     }
                 } catch (e) {

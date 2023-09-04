@@ -23,7 +23,7 @@ const claimLock = async <LOCK extends MobilettoLockType>(
         status: "started",
         started: startedAt,
     });
-    console.info(`claimLock: updating LOCK: ${JSON.stringify(lock)}`);
+    logger.info(`claimLock: updating LOCK: ${JSON.stringify(lock)}`);
     const updated = await lockRepo.update(update);
     const verified = await lockRepo.safeFindById(targetId);
     if (verified?.owner === systemName && verified?.status === "started" && verified?.started === startedAt) {
@@ -56,7 +56,7 @@ export const acquireLock = async <LOCK extends MobilettoLockType>(
             started: clock.now(),
         };
         toCreate[targetType.primary] = targetId;
-        console.info(`acquireLock: creating LOCK<${targetType.typeName}>: ${JSON.stringify(toCreate)}`);
+        logger.info(`acquireLock: creating LOCK<${targetType.typeName}>: ${JSON.stringify(toCreate)}`);
         const created = await lockRepo.create(toCreate as LOCK);
         const found = await lockRepo.safeFindById(targetId);
         if (found?.owner === systemName) {

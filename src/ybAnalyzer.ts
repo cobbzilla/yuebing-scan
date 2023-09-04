@@ -60,7 +60,7 @@ export class YbAnalyzer {
             lock.owner = this.config.systemName; // should be the same, but whatever
             lock.status = "finished";
             lock.finished = this.clock.now();
-            console.info(`analyze: updating finished sourceAsset: ${JSON.stringify(lock)}`);
+            this.config.logger.info(`analyze: updating finished sourceAsset: ${JSON.stringify(lock)}`);
             lockRepo.update(lock).then((l) => {
                 this.config.logger.info(`finished: ${JSON.stringify(l)}`);
             });
