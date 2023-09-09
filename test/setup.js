@@ -60,9 +60,9 @@ export const TEST_OPS = {
 
 export const ANALYSIS_PROFILE_NAME = "wordCounter";
 
-const OP_FUNC_WORDCOUNT = async (downloaded) => ({ result: await countWordsInFile(downloaded) });
-const OP_FUNC_UPCASE = async (downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
-const OP_FUNC_SPLIT_WORDS = async (downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
+const OP_FUNC_WORDCOUNT = async (logger, downloaded) => ({ result: await countWordsInFile(downloaded) });
+const OP_FUNC_UPCASE = async (logger, downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
+const OP_FUNC_SPLIT_WORDS = async (logger, downloaded, profile, outDir) => ({ args: [downloaded, outDir] });
 
 const OP_FUNCS = {
     [OP_WORDCOUNT]: OP_FUNC_WORDCOUNT,

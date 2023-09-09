@@ -37,6 +37,7 @@ export const execTransform = async (
     }
     const outDir = prepareOutputDir(assetDir, downloaded, profile);
     const response: ApplyProfileResponse = await applyProfile(
+        logger,
         downloaded,
         profile.media,
         profile.name,
@@ -60,7 +61,7 @@ export const execTransform = async (
                 return null;
             }
             // todo: record progress
-            const result = await runExternalCommand(profile.operationObject.command, response.args);
+            const result = await runExternalCommand(profile.operationObject.command, response.args, logger);
             if (result.exitCode !== 0) {
                 logger.error(
                     `execTransform: exitCode=${result.exitCode} args=${response.args} profile=${profile.name} asset=${job.asset} stdout=${result.stdout} stderr=${result.stderr}`,

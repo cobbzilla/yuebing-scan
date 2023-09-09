@@ -44,6 +44,7 @@ const execAnalyze = async (
     }
     const outDir = prepareOutputDir(assetDir, downloaded, profile);
     const response: ApplyProfileResponse = await applyProfile(
+        logger,
         downloaded,
         profile.media,
         profile.name,
@@ -68,7 +69,7 @@ const execAnalyze = async (
                 logger.error(`execAnalyze: no profile.operationObject.command for profile=${profile.name}`);
                 return null;
             }
-            const result = await runExternalCommand(profile.operationObject.command, response.args);
+            const result = await runExternalCommand(profile.operationObject.command, response.args, logger);
             if (result.exitCode === 0) {
                 job.status = "finished";
                 job.finished = clock.now();
