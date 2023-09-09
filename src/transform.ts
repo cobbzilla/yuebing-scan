@@ -61,7 +61,7 @@ export const execTransform = async (
                 return null;
             }
             // todo: record progress
-            const result = await runExternalCommand(profile.operationObject.command, response.args, logger);
+            const result = await runExternalCommand(logger, profile.operationObject.command, response.args);
             if (result.exitCode !== 0) {
                 logger.error(
                     `execTransform: exitCode=${result.exitCode} args=${response.args} profile=${profile.name} asset=${job.asset} stdout=${result.stdout} stderr=${result.stderr}`,

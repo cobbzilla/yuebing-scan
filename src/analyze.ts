@@ -69,7 +69,7 @@ const execAnalyze = async (
                 logger.error(`execAnalyze: no profile.operationObject.command for profile=${profile.name}`);
                 return null;
             }
-            const result = await runExternalCommand(profile.operationObject.command, response.args, logger);
+            const result = await runExternalCommand(logger, profile.operationObject.command, response.args);
             if (result.exitCode === 0) {
                 job.status = "finished";
                 job.finished = clock.now();

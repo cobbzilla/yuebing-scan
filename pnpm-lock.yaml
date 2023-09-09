@@ -63,8 +63,8 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   yuebing-media:
-    specifier: ^1.1.45
-    version: 1.1.45
+    specifier: ^1.1.46
+    version: 1.1.46
   yuebing-messages:
     specifier: ^2.1.24
     version: 2.1.24
@@ -1681,8 +1681,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /yuebing-media@1.1.45:
-    resolution: {integrity: sha512-7O7DhC6QogHXmBKI4F+dY6wg4d88aloNo4S5YB3RNd1o0ER8g4TIB3RWMq8zC2QQRPSDUxj3yOTktZBO8xeJYw==}
+  /yuebing-media@1.1.46:
+    resolution: {integrity: sha512-L/xkKpf9BCfSSkGkXvTW6WWKh5/olcvhWc/R8QNGcSZQiQwmtN81MjIMG6xkOVRiKJohDPvxF2Fe9JHj4urUQQ==}
     dev: true
 
   /yuebing-messages@2.1.24:
