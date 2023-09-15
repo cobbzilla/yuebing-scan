@@ -11,7 +11,7 @@ before(async () => {
 describe("analyze test", async () => {
     it("should scan a directory, discover an asset, and analyze it", async () => {
         // wait for scanner to create sourceAsset with status==pending
-        const scanned = await waitForNonemptyQuery(() => test.sourceAssetRepo.findAll());
+        const scanned = await waitForNonemptyQuery(() => test.sourceAssetRepo.findAll(), undefined, 20000);
         expect(scanned).is.not.null;
         expect(scanned.length).eq(1);
         expect(scanned[0].name).eq(test.assetName);

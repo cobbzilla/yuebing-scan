@@ -71,21 +71,29 @@ export class YbScanner {
         this.uploader.stop();
     }
 
-    async scanLibrary(lib: LibraryType, timeout: number) {
+    async scanLibrary(libScan: LibraryScanType) {
         let lock: LibraryScanType | null = null;
+        const lockTimeout = 1000 * 60;
         try {
+            const lib = await this.config.libraryRepo().safeFindById(libScan.library);
+            if (!lib) {
+                this.config.logger.error(
+                    `scanLibrary: system=${this.config.systemName} lib=${libScan.library} error=library_not_found`,
+                );
+                return;
+            }
             lock = await acquireLock(
                 this.config.systemName,
                 this.clock,
                 this.config.logger,
                 this.config.libraryScanRepo(),
-                lib.name,
+                libScan.scanId,
                 LibraryScanTypeDef,
-                timeout,
+                lockTimeout,
             );
             if (!lock) {
                 this.config.logger.debug(
-                    `scanLibrary: system=${this.config.systemName} lib=${lib.name} error=acquiring_lock`,
+                    `scanLibrary: system=${this.config.systemName} lib=${libScan.library} error=acquiring_lock`,
                 );
                 return;
             }

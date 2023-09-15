@@ -1,5 +1,5 @@
 import { ZillaClock } from "zilla-util";
-import { LibraryType } from "yuebing-model";
+import { LibraryScanType } from "yuebing-model";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { YbScanConfig } from "./config.js";
 import { YbAnalyzer } from "./ybAnalyzer.js";
@@ -25,6 +25,6 @@ export declare class YbScanner {
     constructor(config: YbScanConfig);
     start(): void;
     stop(): void;
-    scanLibrary(lib: LibraryType, timeout: number): Promise<void>;
+    scanLibrary(libScan: LibraryScanType): Promise<void>;
     scanSource(sourceName: string, fileExt: string[]): Promise<MobilettoStorageScan>;
 }

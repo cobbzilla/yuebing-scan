@@ -1,6 +1,7 @@
-import { sleep } from "zilla-util";
-import { LibraryType } from "yuebing-model";
+import { sleep, timestamp_as_yyyyMMdd_HHmmSS } from "zilla-util";
+import { LibraryScanType, LibraryType } from "yuebing-model";
 import { YbScanner } from "./ybScanner";
+import { MobilettoOrmPredicate } from "mobiletto-orm-typedef";
 
 export const ybScanLoop = async (ybScan: YbScanner) => {
     let first = true;
@@ -10,8 +11,28 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
             if (!first) await sleep(scanPollInterval);
             else first = false;
 
+            if (ybScan.stopping) break;
+
+            // find pending scans
+            const libraryScanRepo = ybScan.config.libraryScanRepo();
+            const predicate: MobilettoOrmPredicate = (s) => s.scheduled && s.scheduled < ybScan.clock.now();
+            const pendingScans = (
+                (await libraryScanRepo.safeFindBy("status", "pending", {
+                    predicate,
+                })) as LibraryScanType[]
+            ).sort((s1, s2) => s1.scheduled - s2.scheduled);
+
+            // run pending scans
+            for (const pendingScan of pendingScans) {
+                if (ybScan.stopping) break;
+                ybScan.config.logger.info(
+                    `scanLoop: scanLibrary scan=${pendingScan.scanId} lib=${pendingScan.library}`,
+                );
+                await ybScan.scanLibrary(pendingScan);
+            }
+
+            // is auto-scanning enabled in the local config?
             try {
-                // is scanning enabled in the config?
                 const cfg = await ybScan.config.localConfigRepo().findSingleton();
                 if (cfg.scanPollInterval) {
                     // local config can change, update poll interval when we reload local config
@@ -27,18 +48,41 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
                 continue;
             }
 
-            // find libraries with scanning enabled
-            if (ybScan.stopping) break;
+            // find libraries with scanning enabled, schedule pending scans
             const libraries = (await ybScan.config.libraryRepo().safeFindBy("autoscanEnabled", true)) as LibraryType[];
             for (const lib of libraries) {
                 if (ybScan.stopping) break;
+
                 if (!lib.autoscan || !lib.autoscan.interval) {
                     ybScan.config.logger.error(`scanLoop: scanLibrary lib=${lib.name} error=no_interval`);
                     continue;
                 }
-                const interval = lib.autoscan.interval;
+
+                // is a scan already scheduled for this library?
                 try {
-                    await ybScan.scanLibrary(lib, interval);
+                    const predicate: MobilettoOrmPredicate = (s) =>
+                        s.status &&
+                        s.status === "pending" &&
+                        typeof s.scheduled === "number" &&
+                        s.scheduled > ybScan.clock.now();
+                    const pendingIntervalScans = (await libraryScanRepo.safeFindBy("library", lib.name, {
+                        predicate,
+                    })) as LibraryScanType[];
+                    if (ybScan.stopping) break;
+
+                    if (pendingIntervalScans.length === 0) {
+                        // schedule a new scan
+                        const interval = lib.autoscan.interval;
+                        const now = ybScan.clock.now();
+                        const scheduleTime = now + interval;
+                        const newScan: LibraryScanType = {
+                            scanId: `${timestamp_as_yyyyMMdd_HHmmSS(scheduleTime)}-${lib.name}`,
+                            library: lib.name,
+                            status: "pending",
+                            scheduled: scheduleTime,
+                        };
+                        await libraryScanRepo.create(newScan);
+                    }
                 } catch (e) {
                     ybScan.config.logger.error(`scanLoop: scanLibrary lib=${lib.name} error=${e}`);
                 }
