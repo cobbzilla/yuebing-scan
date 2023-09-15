@@ -1,6 +1,6 @@
 {
   "name": "yuebing-scan",
-  "version": "1.2.36",
+  "version": "1.2.37",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
@@ -55,9 +55,9 @@
     "prettier": "^3.0.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^5.1.6",
-    "yuebing-media": "^1.1.46",
+    "yuebing-media": "^1.1.47",
     "yuebing-messages": "^2.1.24",
-    "yuebing-model": "^2.7.62",
+    "yuebing-model": "^2.7.63",
     "yuebing-server-util": "^1.0.2",
     "zilla-util": "^1.0.10"
   }
