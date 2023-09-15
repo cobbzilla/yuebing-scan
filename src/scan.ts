@@ -1,4 +1,4 @@
-import { sleep, timestamp_as_yyyyMMdd_HHmmSS } from "zilla-util";
+import { sleep, timestampAsYYYYMMDDHHmmSS } from "zilla-util";
 import { LibraryScanType, LibraryType } from "yuebing-model";
 import { YbScanner } from "./ybScanner";
 import { MobilettoOrmPredicate } from "mobiletto-orm-typedef";
@@ -76,7 +76,7 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
                         const now = ybScan.clock.now();
                         const scheduleTime = now + interval;
                         const newScan: LibraryScanType = {
-                            scanId: `${timestamp_as_yyyyMMdd_HHmmSS(scheduleTime)}-${lib.name}`,
+                            scanId: `${timestampAsYYYYMMDDHHmmSS(scheduleTime)}-${lib.name}`,
                             library: lib.name,
                             status: "pending",
                             scheduled: scheduleTime,

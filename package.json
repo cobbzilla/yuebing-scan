@@ -1,6 +1,6 @@
 {
   "name": "yuebing-scan",
-  "version": "1.2.37",
+  "version": "1.2.38",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
@@ -59,6 +59,6 @@
     "yuebing-messages": "^2.1.24",
     "yuebing-model": "^2.7.63",
     "yuebing-server-util": "^1.0.2",
-    "zilla-util": "^1.0.10"
+    "zilla-util": "^1.0.12"
   }
 }

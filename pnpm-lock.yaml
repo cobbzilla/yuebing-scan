@@ -75,8 +75,8 @@ devDependencies:
     specifier: ^1.0.2
     version: 1.0.2
   zilla-util:
-    specifier: ^1.0.10
-    version: 1.0.10
+    specifier: ^1.0.12
+    version: 1.0.12
 
 packages:
 
@@ -1684,6 +1684,6 @@ packages:
     resolution: {integrity: sha512-Ca+e7b0AjSPSXqxzInRprRlCplMmVdks+5qF0Z+yqK5Nd5PzgbzCY8tB5jOzDOwVqT9NOzxLck8Citl2YEi3Uw==}
     dev: true
 
-  /zilla-util@1.0.10:
-    resolution: {integrity: sha512-azYGaxQSRYEOi1yjhCcxBOWuQJqd/0wBJ+QNAX0SwWjYu3Ckyw2K0OvSgdWFHFdILKI7e9PvRECT6u4nDeEsHw==}
+  /zilla-util@1.0.12:
+    resolution: {integrity: sha512-/5mK34KsZR/OpEDOhsWNviCq4cKYHg/r5+kW0NskAtWifq62jhTxxlvTeVTGQSyMUrz7J9ir16oS9dk0uIKGww==}
     dev: true
