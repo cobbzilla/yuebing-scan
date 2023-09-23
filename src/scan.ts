@@ -1,15 +1,48 @@
 import { sleep, timestampAsYYYYMMDDHHmmSS } from "zilla-util";
 import { LibraryScanType, LibraryType } from "yuebing-model";
-import { YbScanner } from "./ybScanner";
+import { YbScanner } from "./ybScanner.js";
 import { MobilettoOrmPredicate } from "mobiletto-orm-typedef";
+
+// purge old scans that are more than a week old
+const EXPIRE_OLD_SCAN_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
+
+const ybScanLoopInit = async (ybScan: YbScanner) => {
+    const libraryScanRepo = ybScan.config.libraryScanRepo();
+    const now = ybScan.clock.now();
+    const expiration = now - EXPIRE_OLD_SCAN_TIMEOUT;
+
+    // purge scans that finished a long time ago
+    const finishedScans = (await libraryScanRepo.safeFindBy("status", "finished")) as LibraryScanType[];
+    for (const scan of finishedScans) {
+        if (!scan.finished || scan.finished < expiration) {
+            await libraryScanRepo.purge(scan, { force: true });
+        }
+    }
+
+    // find scans that started but didn't finish, mark them as errors or purge them if old enough
+    const startedScans = (await libraryScanRepo.safeFindBy("status", "started")) as LibraryScanType[];
+    for (const scan of startedScans) {
+        if (!scan.started || scan.started < expiration) {
+            await libraryScanRepo.purge(scan, { force: true });
+        } else {
+            scan.status = "finished";
+            scan.errorCount = scan.errorCount ? scan.errorCount + 1 : 1;
+            await libraryScanRepo.update(scan);
+        }
+    }
+};
 
 export const ybScanLoop = async (ybScan: YbScanner) => {
     let first = true;
     let scanPollInterval = ybScan.scanPollInterval;
     try {
         while (!ybScan.stopping) {
-            if (!first) await sleep(scanPollInterval);
-            else first = false;
+            if (!first) {
+                await sleep(scanPollInterval);
+            } else {
+                await ybScanLoopInit(ybScan);
+                first = false;
+            }
 
             if (ybScan.stopping) break;
 

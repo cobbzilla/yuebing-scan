@@ -148,7 +148,7 @@ export class YbScanner {
                 this.config
                     .libraryScanRepo()
                     .update(lock)
-                    .then((l) => {
+                    .then((l: LibraryScanType) => {
                         this.config.logger.info(`finished: ${JSON.stringify(l)}`);
                     });
             }
