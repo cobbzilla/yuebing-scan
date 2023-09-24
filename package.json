@@ -1,6 +1,6 @@
 {
   "name": "yuebing-scan",
-  "version": "1.2.39",
+  "version": "1.2.40",
   "type": "module",
   "description": "A scanning/processing framework for yuebing",
   "keywords": [
@@ -44,21 +44,21 @@
     "chai": "^4.3.6",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
-    "mobiletto-base": "^2.1.1",
-    "mobiletto-common": "^2.1.2",
-    "mobiletto-driver-local": "^2.0.15",
-    "mobiletto-orm": "^2.2.53",
-    "mobiletto-orm-scan": "^1.0.19",
-    "mobiletto-orm-scan-typedef": "^1.0.17",
-    "mobiletto-orm-typedef": "^2.4.16",
+    "mobiletto-base": "^2.1.3",
+    "mobiletto-common": "^2.1.5",
+    "mobiletto-driver-local": "^2.0.17",
+    "mobiletto-orm": "^2.2.56",
+    "mobiletto-orm-scan": "^1.0.20",
+    "mobiletto-orm-scan-typedef": "^1.0.18",
+    "mobiletto-orm-typedef": "^2.4.19",
     "mocha": "^10.2.0",
     "prettier": "^3.0.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^5.1.6",
-    "yuebing-media": "^1.1.47",
-    "yuebing-messages": "^2.1.24",
-    "yuebing-model": "^2.7.63",
+    "yuebing-media": "^1.1.48",
+    "yuebing-messages": "^2.1.27",
+    "yuebing-model": "^2.7.68",
     "yuebing-server-util": "^1.0.2",
-    "zilla-util": "^1.0.12"
+    "zilla-util": "^1.0.13"
   }
 }
