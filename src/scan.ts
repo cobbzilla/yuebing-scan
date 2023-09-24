@@ -121,6 +121,8 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
                 }
             }
         }
+    } catch (e) {
+        ybScan.config.logger.error(`scanLoop: error=${e}`);
     } finally {
         if (!ybScan.stopping) {
             ybScan.config.logger.warn("scanLoop: loop ending without stopping === true");

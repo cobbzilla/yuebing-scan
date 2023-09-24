@@ -74,6 +74,7 @@ export class YbScanner {
     async scanLibrary(libScan: LibraryScanType) {
         let lock: LibraryScanType | null = null;
         const lockTimeout = 1000 * 60;
+        let hasError = false;
         try {
             const lib = await this.config.libraryRepo().safeFindById(libScan.library);
             if (!lib) {
@@ -139,11 +140,15 @@ export class YbScanner {
                 );
             }
             await Promise.all(sourceScans);
+        } catch (e) {
+            this.config.logger.error(`scanLibrary: error=${e} for libraryScan: ${JSON.stringify(lock)}`);
+            hasError = true;
         } finally {
             if (lock) {
                 lock.owner = this.config.systemName; // should be the same, but whatever
                 lock.status = "finished";
                 lock.finished = this.clock.now();
+                lock.errorCount = hasError ? (lock.errorCount ? lock.errorCount + 1 : 1) : 0;
                 this.config.logger.info(`scanLibrary: updating finished libraryScan: ${JSON.stringify(lock)}`);
                 this.config
                     .libraryScanRepo()
