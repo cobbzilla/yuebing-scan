@@ -203,6 +203,7 @@ export const newTest = async (adjustTest) => {
         profileJobRepo: () => test.profileJobRepo,
         uploadJobRepo: () => test.uploadJobRepo,
         connectSource,
+        napAlarm: { wake: false },
         downloadDir: test.downloadDir,
         assetDir: test.assetDir,
         runAnalyzer: false,

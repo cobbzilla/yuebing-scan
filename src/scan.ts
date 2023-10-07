@@ -40,8 +40,15 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
     try {
         while (!ybScan.stopping) {
             if (!first) {
+                ybScan.config.logger.info(`scanLoop: first==false; napping for ${scanPollInterval}`);
                 await nap(ybScan.clock, ybScan.config.napAlarm, scanPollInterval, SCAN_NAP_TIMEOUT);
+                if (ybScan.config.napAlarm.wake) {
+                    ybScan.config.logger.info("scanLoop: awoke from nap because napAlarm.wake was set");
+                } else {
+                    ybScan.config.logger.info(`scanLoop: awoke from nap after timeout: ${scanPollInterval}`);
+                }
             } else {
+                ybScan.config.logger.info("scanLoop: first==true; calling ybScanLoopInit");
                 await ybScanLoopInit(ybScan);
                 first = false;
             }
