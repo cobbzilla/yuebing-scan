@@ -1,10 +1,12 @@
-import { sleep, timestampAsYYYYMMDDHHmmSS } from "zilla-util";
+import { nap, timestampAsYYYYMMDDHHmmSS } from "zilla-util";
 import { LibraryScanType, LibraryType } from "yuebing-model";
 import { YbScanner } from "./ybScanner.js";
 import { MobilettoOrmPredicate } from "mobiletto-orm-typedef";
 
 // purge old scans that are more than a week old
 const EXPIRE_OLD_SCAN_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
+
+const SCAN_NAP_TIMEOUT = 1000 * 10;
 
 const ybScanLoopInit = async (ybScan: YbScanner) => {
     const libraryScanRepo = ybScan.config.libraryScanRepo();
@@ -38,7 +40,7 @@ export const ybScanLoop = async (ybScan: YbScanner) => {
     try {
         while (!ybScan.stopping) {
             if (!first) {
-                await sleep(scanPollInterval);
+                await nap(ybScan.clock, ybScan.config.napAlarm, scanPollInterval, SCAN_NAP_TIMEOUT);
             } else {
                 await ybScanLoopInit(ybScan);
                 first = false;
