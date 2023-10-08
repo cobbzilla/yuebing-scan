@@ -1,4 +1,4 @@
-import { DEFAULT_CLOCK, ZillaClock, sleep } from "zilla-util";
+import { DEFAULT_CLOCK, NapAlarm, ZillaClock, sleep } from "zilla-util";
 import { MobilettoMetadata } from "mobiletto-common";
 import { SourceAssetType, LibraryScanType, LibraryType, MediaType, LibraryScanTypeDef } from "yuebing-model";
 import { MobilettoOrmObject } from "mobiletto-orm";
@@ -17,6 +17,7 @@ export class YbScanner {
     readonly config: YbScanConfig;
     readonly scanPollInterval: number;
     readonly clock: ZillaClock;
+    readonly napAlarm: NapAlarm;
     readonly initTime: number;
 
     timeout: number | object | null = null;
@@ -36,6 +37,7 @@ export class YbScanner {
         this.config = config;
         this.scanPollInterval = config.scanPollInterval ? config.scanPollInterval : DEFAULT_SCAN_CHECK_INTERVAL;
         this.clock = config.clock ? config.clock : DEFAULT_CLOCK;
+        this.napAlarm = { wake: false };
         this.initTime = this.clock.now();
         this.scanner = new MobilettoScanner(this.config.systemName, this.scanPollInterval, this.clock);
         this.runScanner = this.config.runScanner !== false;
@@ -69,6 +71,10 @@ export class YbScanner {
         this.analyzer.stop();
         this.transformer.stop();
         this.uploader.stop();
+    }
+
+    awaken() {
+        this.napAlarm.wake = true;
     }
 
     async scanLibrary(libScan: LibraryScanType) {

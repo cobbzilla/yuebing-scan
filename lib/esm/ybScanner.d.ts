@@ -1,4 +1,4 @@
-import { ZillaClock } from "zilla-util";
+import { NapAlarm, ZillaClock } from "zilla-util";
 import { LibraryScanType } from "yuebing-model";
 import { MobilettoScanner, MobilettoStorageScan } from "mobiletto-orm-scan";
 import { YbScanConfig } from "./config.js";
@@ -10,6 +10,7 @@ export declare class YbScanner {
     readonly config: YbScanConfig;
     readonly scanPollInterval: number;
     readonly clock: ZillaClock;
+    readonly napAlarm: NapAlarm;
     readonly initTime: number;
     timeout: number | object | null;
     running: boolean;
@@ -25,6 +26,7 @@ export declare class YbScanner {
     constructor(config: YbScanConfig);
     start(): void;
     stop(): void;
+    awaken(): void;
     scanLibrary(libScan: LibraryScanType): Promise<void>;
     scanSource(sourceName: string, fileExt: string[]): Promise<MobilettoStorageScan>;
 }

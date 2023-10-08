@@ -1,4 +1,4 @@
-import { NapAlarm, ZillaClock } from "zilla-util";
+import { ZillaClock } from "zilla-util";
 import { MobilettoLogger } from "mobiletto-common";
 import { MobilettoOrmRepository } from "mobiletto-orm";
 import { SourceAssetType, LibraryScanType, LibraryType, LocalConfigType, MediaType, MediaProfileType, SourceScanType, SourceType, DestinationType, ProfileJobType, UploadJobType } from "yuebing-model";
@@ -21,7 +21,6 @@ export type YbScanConfig = {
     downloadDir: string;
     assetDir: string;
     clock?: ZillaClock;
-    napAlarm: NapAlarm;
     scanPollInterval?: number;
     analyzerPollInterval?: number;
     transformerPollInterval?: number;
